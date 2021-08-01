@@ -2,10 +2,14 @@ const express = require("express");
 const dotenv = require("dotenv");
 const app = express();
 const apiRouter = require("./routes/apiRoutes.js");
+const compression = require("compression");
 console.clear();
 
 //Load in config
 dotenv.config();
+
+//Compress responses
+app.use(compression());
 
 //All Routes
 //Handle all API Routes
