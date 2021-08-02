@@ -4,6 +4,11 @@ const {
   getAllGlobalAchievements,
   getAllPlayerAchievements,
 } = require("../actions/crawlActions");
+
+const {
+  STEAM_ALL_GAMES_URL,
+  STEAM_GAME_HEADER_IMAGE,
+} = require("../config/steamConfig");
 const { writeLog } = require("../utils/fileUtils");
 
 exports.apiRootEndpoint = (req, res, next) => {
@@ -17,9 +22,20 @@ exports.apiRootEndpoint = (req, res, next) => {
 exports.allOwnedGames = async (req, res, next) => {
   const allGames = await getAllGamesFromSteam();
 
+  const newFormatGames = {};
+  newFormatGames.games = allGames.games.map((game) => {
+    const newGame = {};
+    newGame.name = game.name;
+    newGame.game_id = game.appid;
+    newGame.header_image = STEAM_GAME_HEADER_IMAGE(game.game_id);
+    newGame.playtime_minutes = game.playtime_forever;
+    console.log(newGame);
+    return newGame;
+  });
+
   const schemaAddedGames = await Promise.all(
-    allGames.games.map(async (game) => {
-      const schemaAchievements = await getAllSchemaAchievements(game.appid);
+    newFormatGames.games.map(async (game) => {
+      const schemaAchievements = await getAllSchemaAchievements(game.game_id);
       game.schemaAchievements = schemaAchievements;
       return game;
     })
@@ -27,7 +43,7 @@ exports.allOwnedGames = async (req, res, next) => {
 
   const globalAddedGames = await Promise.all(
     schemaAddedGames.map(async (game) => {
-      const globalAchievements = await getAllGlobalAchievements(game.appid);
+      const globalAchievements = await getAllGlobalAchievements(game.game_id);
       game.globalAchievements = globalAchievements;
       return game;
     })
@@ -35,7 +51,7 @@ exports.allOwnedGames = async (req, res, next) => {
 
   const playerAddedGames = await Promise.all(
     globalAddedGames.map(async (game) => {
-      const playerAchievements = await getAllPlayerAchievements(game.appid);
+      const playerAchievements = await getAllPlayerAchievements(game.game_id);
       game.playerAchievements = playerAchievements;
       return game;
     })

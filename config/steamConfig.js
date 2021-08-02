@@ -11,3 +11,6 @@ exports.STEAM_ALL_ACHIEVEMENTS_GLOBAL = (gameID) =>
 
 exports.STEAM_ALL_ACHIEVEMENTS_PLAYER = (gameID) =>
   `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/?appid=${gameID}&key=${process.env.STEAM_API_KEY}&steamid=${process.env.STEAM_USER_ID}`;
+
+exports.STEAM_GAME_HEADER_IMAGE = (gameID) =>
+  `https://cdn.cloudflare.steamstatic.com/steam/apps/${gameID}/header.jpg?t=1623162512`;
