@@ -9,6 +9,8 @@ var parser = new DomParser();
 const {
   STEAM_ALL_GAMES_URL,
   STEAM_ALL_ACHIEVEMENTS_SCHEMA,
+  STEAM_ALL_ACHIEVEMENTS_PLAYER,
+  STEAM_ALL_ACHIEVEMENTS_GLOBAL,
 } = require("../config/steamConfig");
 const { writeLog } = require("../utils/fileUtils");
 
@@ -34,10 +36,8 @@ exports.getAllGamesFromSteam = async () => {
 exports.getAllSchemaAchievements = async (gameID) => {
   console.clear();
   try {
-    const schemaAchievements = await axios.get(
-      STEAM_ALL_ACHIEVEMENTS_SCHEMA(gameID)
-    );
-    return schemaAchievements.data;
+    const achievements = await axios.get(STEAM_ALL_ACHIEVEMENTS_SCHEMA(gameID));
+    return achievements.data.game.availableGameStats.achievements;
   } catch (error) {
     return {
       status: "fail",
@@ -52,10 +52,10 @@ exports.getAllSchemaAchievements = async (gameID) => {
 exports.getAllPlayerAchievements = async (gameID) => {
   console.clear();
   try {
-    const schemaAchievements = await axios.get(
-      STEAM_ALL_ACHIEVEMENTS_SCHEMA(gameID)
+    const playerAchievements = await axios.get(
+      STEAM_ALL_ACHIEVEMENTS_PLAYER(gameID)
     );
-    return schemaAchievements.data;
+    return playerAchievements.data.playerstats.achievements;
   } catch (error) {
     return {
       status: "fail",
@@ -70,10 +70,10 @@ exports.getAllPlayerAchievements = async (gameID) => {
 exports.getAllGlobalAchievements = async (gameID) => {
   console.clear();
   try {
-    const schemaAchievements = await axios.get(
-      STEAM_ALL_ACHIEVEMENTS_SCHEMA(gameID)
+    const globalAchievements = await axios.get(
+      STEAM_ALL_ACHIEVEMENTS_GLOBAL(gameID)
     );
-    return schemaAchievements.data;
+    return globalAchievements.data.achievementpercentages.achievements;
   } catch (error) {
     return {
       status: "fail",

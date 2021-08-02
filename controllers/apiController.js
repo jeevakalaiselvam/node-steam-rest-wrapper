@@ -22,50 +22,52 @@ exports.apiRootEndpoint = (req, res, next) => {
 exports.allOwnedGames = async (req, res, next) => {
   const allGames = await getAllGamesFromSteam();
 
-  const newFormatGames = {};
+  let newFormatGames = {};
+  newFormatGames.total_games = allGames.total_count;
+
   newFormatGames.games = allGames.games.map((game) => {
     const newGame = {};
     newGame.name = game.name;
     newGame.game_id = game.appid;
-    newGame.header_image = STEAM_GAME_HEADER_IMAGE(game.game_id);
+    newGame.header_image = STEAM_GAME_HEADER_IMAGE(game.appid);
     newGame.playtime_minutes = game.playtime_forever;
     console.log(newGame);
     return newGame;
   });
 
-  const schemaAddedGames = await Promise.all(
+  newFormatGames = await Promise.all(
     newFormatGames.games.map(async (game) => {
       const schemaAchievements = await getAllSchemaAchievements(game.game_id);
-      game.schemaAchievements = schemaAchievements;
+      game.schema_achievements = schemaAchievements;
       return game;
     })
   );
 
-  const globalAddedGames = await Promise.all(
-    schemaAddedGames.map(async (game) => {
+  newFormatGames = await Promise.all(
+    newFormatGames.map(async (game) => {
       const globalAchievements = await getAllGlobalAchievements(game.game_id);
-      game.globalAchievements = globalAchievements;
+      game.global_achievements = globalAchievements;
       return game;
     })
   );
 
-  const playerAddedGames = await Promise.all(
-    globalAddedGames.map(async (game) => {
+  newFormatGames = await Promise.all(
+    newFormatGames.map(async (game) => {
       const playerAchievements = await getAllPlayerAchievements(game.game_id);
-      game.playerAchievements = playerAchievements;
+      game.player_achievements = playerAchievements;
       return game;
     })
   );
 
   //If games data is present
-  playerAddedGames &&
+  newFormatGames &&
     res.json({
       status: "success",
-      games: playerAddedGames,
+      games: newFormatGames,
     });
 
   //If unable to get games
-  !playerAddedGames &&
+  !newFormatGames &&
     res.json({
       status: "fail",
       file: "[CONTROLLER]",
