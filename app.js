@@ -1,15 +1,53 @@
 const express = require("express");
+const path = require("path");
 const dotenv = require("dotenv");
+const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
+const cookieParser = require("cookie-parser");
+const compression = require("compression");
+const cors = require("cors");
 const app = express();
 const apiRouter = require("./routes/apiRoutes.js");
-const compression = require("compression");
 console.clear();
 
 //Load in config
 dotenv.config();
 
-//Compress responses
+//Middleware Stack
 app.use(compression());
+app.enable("trust proxy");
+app.options("*", cors());
+app.use(cors());
+app.use(express.static(path.join(__dirname, "public")));
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
+app.use(helmet());
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
+
+//Rate Limit
+const limiter = rateLimit({
+  max: 10000,
+  windowMs: 60 * 60 * 1000,
+  message: "Too many requests from this IP, please try again in an hour!",
+});
+app.use("/api", limiter);
+
+//Cookie Parser
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+app.use(cookieParser());
+
+//Prevention
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+// Data sanitization against XSS
+app.use(xss());
 
 //All Routes
 //Handle all API Routes
