@@ -25,13 +25,14 @@ exports.allOwnedGames = async (req, res, next) => {
   let newFormatGames = {};
   newFormatGames.total_games = allGames.total_count;
 
+  //USE SPLICE HERE WHEN TESTING
   newFormatGames.games = allGames.games.map((game) => {
     const newGame = {};
     newGame.name = game.name;
     newGame.game_id = game.appid;
     newGame.header_image = STEAM_GAME_HEADER_IMAGE(game.appid);
     newGame.playtime_minutes = game.playtime_forever;
-    console.log(newGame);
+
     return newGame;
   });
 
@@ -78,12 +79,12 @@ exports.allOwnedGames = async (req, res, next) => {
 };
 
 //Merge all achievement data present in response from backend API and put them into a single achivements array in each game object
-const mergeFilterAndCalculate = (games) => {
-  const achievementOnlyGames = filterAchievementOnlyGames(games);
-  const addTotalAchievementsGames =
-    addTotalAchievementsForEachGame(achievementOnlyGames);
+const mergeFilterAndCalculate = (newFormatGames) => {
+  const achievementOnlyGames = filterAchievementOnlyGames(newFormatGames);
+  console.log("ACHIEVEMENT ONLY GAME COUNT -> ", achievementOnlyGames.length);
+  const achievementsMergesGames = mergeAchievements(achievementOnlyGames);
 
-  return addTotalAchievementsGames;
+  return achievementsMergesGames;
 };
 
 //Filter and return only games having achivements
@@ -101,13 +102,67 @@ const filterAchievementOnlyGames = (games) => {
 };
 
 //For each game, Check the total achivements in schema_achievements and add a new field total_achievements for each game
-const addTotalAchievementsForEachGame = (games) => {
-  const totalAchievementsAddedGames = games.map((game) => {
-    const totalAchievementAddedGame = {
-      ...game,
-      total_achievements: game.schema_achievements.length,
-    };
-    return totalAchievementAddedGame;
+const mergeAchievements = (games) => {
+  let achievementMergesGames = [];
+
+  achievementMergesGames = games.map((game) => {
+    console.log("CREATING GAME -> ", game.name, " ", game.game_id);
+    const newGame = {};
+    newGame.name = game.name;
+    newGame.id = game.game_id;
+    newGame.image = game.header_image;
+    newGame.playtime_minutes = game.playtime_minutes;
+    newGame.total_achievements_count = game.schema_achievements.length;
+
+    //Add fields from player_achievements and global_achievements into all_achievements
+    newGame.all_achievements = game.schema_achievements.map(
+      (achievementSchema) => {
+        const newAchievement = {};
+        newAchievement.id = achievementSchema.name;
+        newAchievement.name = achievementSchema.displayName;
+        newAchievement.hidden = achievementSchema.hidden;
+        newAchievement.icon = achievementSchema.icon;
+        newAchievement.icon_locked = achievementSchema.icongray;
+        const globalPercentageOfAchievement = game.global_achievements.find(
+          (achievementGlobal) => {
+            if (achievementSchema.name === achievementGlobal.name) {
+              return true;
+            }
+          }
+        );
+        if (globalPercentageOfAchievement)
+          newAchievement.global_percentage =
+            globalPercentageOfAchievement.percent;
+        else newAchievement.global_percentage = "0";
+
+        const unlockedForAchievement = game.player_achievements.find(
+          (achievementPlayer) => {
+            if (achievementSchema.name === achievementPlayer.apiname) {
+              return true;
+            }
+          }
+        );
+        if (unlockedForAchievement)
+          newAchievement.unlocked = unlockedForAchievement.achieved;
+        else newAchievement.unlocked = 0;
+
+        const unlockedTimeForAchievement = game.player_achievements.find(
+          (achievementPlayer) => {
+            if (achievementSchema.name === achievementPlayer.apiname) {
+              return true;
+            }
+          }
+        );
+        if (unlockedTimeForAchievement)
+          newAchievement.unlocked_time = unlockedTimeForAchievement.unlocktime;
+        else newAchievement.unlocked_time = 0;
+
+        return newAchievement;
+      }
+    );
+
+    return newGame;
   });
-  return totalAchievementsAddedGames;
+
+  return achievementMergesGames;
 };
