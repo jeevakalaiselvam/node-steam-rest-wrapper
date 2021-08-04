@@ -26,7 +26,7 @@ exports.allOwnedGames = async (req, res, next) => {
   newFormatGames.total_games = allGames.total_count;
 
   //USE SPLICE HERE WHEN TESTING
-  newFormatGames.games = allGames.games.map((game) => {
+  newFormatGames.games = allGames.games.slice(103, 104).map((game, index) => {
     const newGame = {};
     newGame.name = game.name;
     newGame.game_id = game.appid;
@@ -103,16 +103,14 @@ const filterAchievementOnlyGames = (games) => {
 
 //For each game, Check the total achivements in schema_achievements and add a new field total_achievements for each game
 const mergeAchievements = (games) => {
-  let achievementMergesGames = [];
+  let achievementsMergedGames = [];
 
-  achievementMergesGames = games.map((game) => {
-    console.log("CREATING GAME -> ", game.name, " ", game.game_id);
+  achievementsMergedGames = games.map((game, index) => {
     const newGame = {};
     newGame.name = game.name;
     newGame.id = game.game_id;
     newGame.image = game.header_image;
     newGame.playtime_minutes = game.playtime_minutes;
-    newGame.total_achievements_count = game.schema_achievements.length;
 
     //Add fields from player_achievements and global_achievements into all_achievements
     newGame.all_achievements = game.schema_achievements.map(
@@ -161,8 +159,24 @@ const mergeAchievements = (games) => {
       }
     );
 
+    newGame.total_achievements_count = game.schema_achievements.length;
+    newGame.completed_achievements_count = newGame.all_achievements.reduce(
+      (acc, achievement) => {
+        if (achievement.unlocked === 1) {
+          return acc + 1;
+        }
+        return acc + 0;
+      },
+      0
+    );
+    newGame.completion_percentage = (
+      (newGame.completed_achievements_count /
+        newGame.total_achievements_count) *
+      100
+    ).toFixed(4);
+
     return newGame;
   });
 
-  return achievementMergesGames;
+  return achievementsMergedGames;
 };
