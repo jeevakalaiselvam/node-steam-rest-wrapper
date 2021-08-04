@@ -26,7 +26,7 @@ exports.allOwnedGames = async (req, res, next) => {
   newFormatGames.total_games = allGames.total_count;
 
   //USE SPLICE HERE WHEN TESTING
-  newFormatGames.games = allGames.games.slice(103, 104).map((game, index) => {
+  newFormatGames.games = allGames.games.map((game, index) => {
     const newGame = {};
     newGame.name = game.name;
     newGame.game_id = game.appid;
@@ -117,6 +117,7 @@ const mergeAchievements = (games) => {
       (achievementSchema) => {
         const newAchievement = {};
         newAchievement.id = achievementSchema.name;
+        newAchievement.game_id = game.game_id;
         newAchievement.name = achievementSchema.displayName;
         newAchievement.hidden = achievementSchema.hidden;
         newAchievement.icon = achievementSchema.icon;
