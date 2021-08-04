@@ -59,18 +59,55 @@ exports.allOwnedGames = async (req, res, next) => {
     })
   );
 
+  const transformedGames = mergeFilterAndCalculate(newFormatGames);
+
   //If games data is present
-  newFormatGames &&
+  transformedGames &&
     res.json({
       status: "success",
-      games: newFormatGames,
+      games: transformedGames,
     });
 
   //If unable to get games
-  !newFormatGames &&
+  !transformedGames &&
     res.json({
       status: "fail",
       file: "[CONTROLLER]",
       message: "No games complete response obtained!",
     });
+};
+
+//Merge all achievement data present in response from backend API and put them into a single achivements array in each game object
+const mergeFilterAndCalculate = (games) => {
+  const achievementOnlyGames = filterAchievementOnlyGames(games);
+  const addTotalAchievementsGames =
+    addTotalAchievementsForEachGame(achievementOnlyGames);
+
+  return addTotalAchievementsGames;
+};
+
+//Filter and return only games having achivements
+const filterAchievementOnlyGames = (games) => {
+  const achievementOnlyFilteredGames = games.filter((game) => {
+    if (game.schema_achievements) {
+      if (game.schema_achievements.length > 0) {
+        return true;
+      }
+    }
+    return false;
+  });
+
+  return achievementOnlyFilteredGames;
+};
+
+//For each game, Check the total achivements in schema_achievements and add a new field total_achievements for each game
+const addTotalAchievementsForEachGame = (games) => {
+  const totalAchievementsAddedGames = games.map((game) => {
+    const totalAchievementAddedGame = {
+      ...game,
+      total_achievements: game.schema_achievements.length,
+    };
+    return totalAchievementAddedGame;
+  });
+  return totalAchievementsAddedGames;
 };
