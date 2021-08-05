@@ -10,12 +10,29 @@ const {
   STEAM_GAME_HEADER_IMAGE,
 } = require("../config/steamConfig");
 const { writeLog } = require("../utils/fileUtils");
+const fs = require("fs");
+const path = require("path");
 
 exports.apiRootEndpoint = (req, res, next) => {
   res.json({
     status: "success",
     data: "API ENDPOINT",
   });
+};
+
+exports.sendTestResponse = async (req, res, next) => {
+  console.log("SENDING TEST RESPONSE");
+  fs.readFile(
+    path.join(__dirname, "../", "log", "games.json"),
+    "utf8",
+    (err, data) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      res.json(JSON.parse(data));
+    }
+  );
 };
 
 //Get all games
@@ -62,10 +79,27 @@ exports.allOwnedGames = async (req, res, next) => {
 
   const transformedGames = mergeFilterAndCalculate(newFormatGames);
 
+  const responseToCache = {
+    status: "success",
+    test: "test",
+    games: transformedGames,
+  };
+
+  try {
+    const data = fs.writeFileSync(
+      path.join(__dirname, "../", "log", "games.json"),
+      JSON.stringify(responseToCache)
+    );
+    //file written successfully
+  } catch (err) {
+    console.error(err);
+  }
+
   //If games data is present
   transformedGames &&
     res.json({
       status: "success",
+
       games: transformedGames,
     });
 
@@ -118,6 +152,7 @@ const mergeAchievements = (games) => {
         const newAchievement = {};
         newAchievement.id = achievementSchema.name;
         newAchievement.game_id = game.game_id;
+        newAchievement.game_name = game.name;
         newAchievement.name = achievementSchema.displayName;
         newAchievement.hidden = achievementSchema.hidden;
         newAchievement.icon = achievementSchema.icon;
