@@ -4,6 +4,9 @@ const {
   getAllGlobalAchievements,
   getAllPlayerAchievements,
 } = require("../actions/crawlActions");
+const axios = require("axios");
+const cheerio = require("cheerio");
+const htmlparser2 = require("htmlparser2");
 
 const {
   STEAM_ALL_GAMES_URL,
@@ -30,7 +33,10 @@ exports.sendTestResponse = async (req, res, next) => {
         console.error(err);
         return;
       }
-      res.json(JSON.parse(data));
+      const status = JSON.parse(data);
+      const games = status.games;
+
+      res.json(status);
     }
   );
 };
@@ -156,6 +162,8 @@ const mergeAchievements = (games) => {
         newAchievement.name = achievementSchema.displayName;
         newAchievement.hidden = achievementSchema.hidden;
         newAchievement.icon = achievementSchema.icon;
+        newAchievement.description =
+          achievementSchema.description || "Hidden Achievement";
         newAchievement.icon_locked = achievementSchema.icongray;
         const globalPercentageOfAchievement = game.global_achievements.find(
           (achievementGlobal) => {
@@ -187,9 +195,18 @@ const mergeAchievements = (games) => {
             }
           }
         );
-        if (unlockedTimeForAchievement)
-          newAchievement.unlocked_time = unlockedTimeForAchievement.unlocktime;
-        else newAchievement.unlocked_time = 0;
+        if (unlockedTimeForAchievement) {
+          if (unlockedForAchievement.unlocktime !== 0) {
+            newAchievement.unlocked_time =
+              unlockedTimeForAchievement.unlocktime;
+            newAchievement.unlocked_time_desc = formatDate(
+              new Date(unlockedTimeForAchievement.unlocktime * 1000)
+            );
+          } else {
+            newAchievement.unlocked_time = 0;
+            unlocked_time_desc = 0;
+          }
+        }
 
         return newAchievement;
       }
@@ -216,3 +233,15 @@ const mergeAchievements = (games) => {
 
   return achievementsMergedGames;
 };
+
+function formatDate(date) {
+  var d = new Date(date),
+    month = "" + (d.getMonth() + 1),
+    day = "" + d.getDate(),
+    year = d.getFullYear();
+
+  if (month.length < 2) month = "0" + month;
+  if (day.length < 2) day = "0" + day;
+
+  return [year, month, day].join("-");
+}
