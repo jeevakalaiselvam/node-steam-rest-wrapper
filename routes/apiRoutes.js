@@ -8,9 +8,15 @@ const router = express.Router();
 // } else {
 //   router.get("/games", apiController.allOwnedGames);
 // }
-router.get("/games", apiController.sendTestResponse);
-// router.get("/games", apiController.allOwnedGames);
 
+router.get("/games", apiController.getAllGames);
+
+//Send response for root API
 router.get("/", apiController.apiRootEndpoint);
+
+//Server loading games from every 30 mins.
+setInterval(() => {
+  console.log("Getting games from Steam");
+}, 1000 * 60 * 30);
 
 module.exports = router;
