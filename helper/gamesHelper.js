@@ -13,3 +13,34 @@ exports.paginateGames = (games, page) => {
   }
   return games.slice(startIndex, lastIndex);
 };
+
+exports.getAllPerfectGames = (games) => {
+  let perfectGames = [];
+  games.forEach((game) => {
+    if (game.completion_percentage >= 80) {
+      perfectGames.push(game);
+    }
+  });
+
+  return perfectGames;
+};
+
+exports.getNRandomGameImages = (games, count) => {
+  let images = [];
+  let start = count;
+  while (start > 0) {
+    images.push(games[Math.floor(Math.random() * games.length)].image);
+    start--;
+  }
+  return images;
+};
+
+exports.getNPerfectGameImages = (games, count) => {
+  let images = [];
+  let start = count;
+  while (start > 0) {
+    images.push(games[Math.floor(Math.random() * games.length)].image);
+    start--;
+  }
+  return images;
+};

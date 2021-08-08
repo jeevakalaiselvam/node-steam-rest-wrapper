@@ -9,6 +9,7 @@ const router = express.Router();
 //   router.get("/games", apiController.allOwnedGames);
 // }
 
+router.get("/overlay", apiController.getImagesForOverlay);
 router.get("/database", apiController.getDatabase);
 router.get("/games/info", apiController.getAllGamesInfo);
 router.get("/games", apiController.getAllGames);

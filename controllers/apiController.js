@@ -5,8 +5,16 @@ const {
   getGamesSortedByPlaytime,
   getGamesSortedByNameAZ,
   getGamesSortedByNameZA,
+  getAllRecentlyUnlockedAchievements,
+  getNAchievementImages,
 } = require("../helper/achivementHelper");
-const { paginateGames } = require("../helper/gamesHelper");
+const {
+  paginateGames,
+  getAllPerfectGames,
+  getNRandomGameImages,
+  getNPerfectGameImages,
+} = require("../helper/gamesHelper");
+const { writeLog } = require("../utils/fileUtils");
 
 const ADD_TEST_DELAY = true;
 
@@ -14,7 +22,7 @@ exports.sendResponse = (res, data) => {
   if (ADD_TEST_DELAY) {
     setTimeout(() => {
       res.json(data);
-    }, 1000);
+    }, 200);
   } else {
     res.json(data);
   }
@@ -125,6 +133,50 @@ exports.getAllGamesInfo = (req, res) => {
       gameInfo.perfect_games_count = perfectGames;
 
       this.sendResponse(res, gameInfo);
+    }
+  );
+};
+
+exports.getImagesForOverlay = (req, res) => {
+  const gamesCount = req.query.games ?? 1;
+  const achievementCount = req.query.achievements ?? 1;
+  const perfectGamesCount = req.query.perfectgames ?? 1;
+
+  fs.readFile(
+    path.join(__dirname, "../", "store", "games.json"),
+    "utf8",
+    (err, data) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      const allGames = JSON.parse(data).games;
+      const perfectGames = getAllPerfectGames(allGames);
+      const allRecentlyUnlockedAchievements = getAllRecentlyUnlockedAchievements(
+        allGames
+      );
+      writeLog(allGames, "allGames.json");
+      writeLog(perfectGames, "perfectGames.json");
+      writeLog(
+        allRecentlyUnlockedAchievements,
+        "allRecentlyUnlockedAchievements.json"
+      );
+
+      const randomNGamesImages = getNRandomGameImages(allGames, gamesCount);
+      const randomNAchievementImages = getNAchievementImages(
+        allRecentlyUnlockedAchievements,
+        achievementCount
+      );
+      const randomNPerfectGameImages = getNPerfectGameImages(
+        perfectGames,
+        perfectGamesCount
+      );
+
+      this.sendResponse(res, {
+        game_images: randomNGamesImages,
+        achievement_images: randomNAchievementImages,
+        perfect_game_images: randomNPerfectGameImages,
+      });
     }
   );
 };
