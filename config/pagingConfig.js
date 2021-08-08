@@ -1,0 +1,1 @@
+exports.GAMES_PAGINATION_PER_PAGE = 50;

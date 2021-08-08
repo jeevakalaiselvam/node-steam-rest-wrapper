@@ -72,7 +72,7 @@ app.get("*", (req, res) => {
 setInterval(() => {
   console.log("Getting data from Steam and storing..");
   allOwnedGames();
-}, 1000 * 60 * 30);
+}, 1000 * 60 * 60);
 
 const PORT = process.env.PORT || 8888;
 app.listen(PORT, () => console.log(`Listening on port ${PORT} 👋`));
