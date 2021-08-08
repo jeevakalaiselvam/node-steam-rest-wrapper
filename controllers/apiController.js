@@ -6,6 +6,7 @@ const {
   getGamesSortedByNameAZ,
   getGamesSortedByNameZA,
 } = require("../helper/achivementHelper");
+const { paginateGames } = require("../helper/gamesHelper");
 
 const ADD_TEST_DELAY = true;
 
@@ -44,6 +45,7 @@ exports.getDatabase = (req, res) => {
 exports.getAllGames = (req, res) => {
   const sort = req.query.sort ?? "";
   const order = req.query.order ?? "";
+  const page = req.query.page ?? "0";
 
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
@@ -71,17 +73,18 @@ exports.getAllGames = (req, res) => {
 
       console.log(sort);
 
-      let sortedByCompletionGames = [];
+      let sortedGames = [];
       if (sort === "completion")
-        sortedByCompletionGames = getGamesSortedByCompletionPercentage(games);
-      if (sort === "playtime")
-        sortedByCompletionGames = getGamesSortedByPlaytime(games);
+        sortedGames = getGamesSortedByCompletionPercentage(games);
+      if (sort === "playtime") sortedGames = getGamesSortedByPlaytime(games);
       if (sort === "name" && order === "az")
-        sortedByCompletionGames = getGamesSortedByNameAZ(games);
+        sortedGames = getGamesSortedByNameAZ(games);
       if (sort === "name" && order === "za")
-        sortedByCompletionGames = getGamesSortedByNameZA(games);
+        sortedGames = getGamesSortedByNameZA(games);
 
-      this.sendResponse(res, sortedByCompletionGames);
+      const paginatedGames = paginateGames(sortedGames, page);
+
+      this.sendResponse(res, paginatedGames);
     }
   );
 };
