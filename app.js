@@ -11,7 +11,7 @@ const compression = require("compression");
 const cors = require("cors");
 const app = express();
 const apiRouter = require("./routes/apiRoutes.js");
-const { allOwnedGames } = require("./controllers/apiController.js");
+const { allOwnedGames } = require("./controllers/cacheController.js");
 console.clear();
 
 //Load in config

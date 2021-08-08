@@ -16,13 +16,6 @@ const { writeLog } = require("../utils/fileUtils");
 const fs = require("fs");
 const path = require("path");
 
-exports.apiRootEndpoint = (req, res, next) => {
-  res.json({
-    status: "success",
-    data: "API ENDPOINT",
-  });
-};
-
 exports.sendTestResponse = async (req, res, next) => {
   console.log("SENDING TEST RESPONSE");
   fs.readFile(
@@ -42,7 +35,7 @@ exports.sendTestResponse = async (req, res, next) => {
 };
 
 //Get all games
-exports.allOwnedGames = async (req, res, next) => {
+exports.allOwnedGames = async () => {
   const allGames = await getAllGamesFromSteam();
 
   let newFormatGames = {};
@@ -85,8 +78,24 @@ exports.allOwnedGames = async (req, res, next) => {
 
   const transformedGames = mergeFilterAndCalculate(newFormatGames);
 
+  const currentdate = new Date();
+  const datetime =
+    "Last Sync: " +
+    currentdate.getDate() +
+    "/" +
+    (currentdate.getMonth() + 1) +
+    "/" +
+    currentdate.getFullYear() +
+    " @ " +
+    currentdate.getHours() +
+    ":" +
+    currentdate.getMinutes() +
+    ":" +
+    currentdate.getSeconds();
+
   const responseToCache = {
     games: transformedGames,
+    timestamp: datetime,
   };
 
   try {

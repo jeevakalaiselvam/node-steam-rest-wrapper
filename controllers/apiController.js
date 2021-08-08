@@ -48,7 +48,9 @@ exports.getAllGames = (req, res) => {
         games.push(game);
       });
 
-      res.json(games);
+      setTimeout(() => {
+        res.json(games);
+      }, 3000);
     }
   );
 };
