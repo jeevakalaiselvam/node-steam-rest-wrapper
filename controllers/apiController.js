@@ -2,6 +2,9 @@ const fs = require("fs");
 const path = require("path");
 const {
   getGamesSortedByCompletionPercentage,
+  getGamesSortedByPlaytime,
+  getGamesSortedByNameAZ,
+  getGamesSortedByNameZA,
 } = require("../helper/achivementHelper");
 
 const ADD_TEST_DELAY = true;
@@ -39,6 +42,9 @@ exports.getDatabase = (req, res) => {
 };
 
 exports.getAllGames = (req, res) => {
+  const sort = req.query.sort ?? "";
+  const order = req.query.order ?? "";
+
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
     "utf8",
@@ -63,8 +69,17 @@ exports.getAllGames = (req, res) => {
         games.push(game);
       });
 
-      const sortedByCompletionGames =
-        getGamesSortedByCompletionPercentage(games);
+      console.log(sort);
+
+      let sortedByCompletionGames = [];
+      if (sort === "completion")
+        sortedByCompletionGames = getGamesSortedByCompletionPercentage(games);
+      if (sort === "playtime")
+        sortedByCompletionGames = getGamesSortedByPlaytime(games);
+      if (sort === "name" && order === "az")
+        sortedByCompletionGames = getGamesSortedByNameAZ(games);
+      if (sort === "name" && order === "za")
+        sortedByCompletionGames = getGamesSortedByNameZA(games);
 
       this.sendResponse(res, sortedByCompletionGames);
     }
