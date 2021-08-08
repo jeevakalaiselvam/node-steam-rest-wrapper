@@ -1,5 +1,8 @@
 const fs = require("fs");
 const path = require("path");
+const {
+  getGamesSortedByCompletionPercentage,
+} = require("../helper/achivementHelper");
 
 exports.apiRootEndpoint = (req, res, next) => {
   res.json({
@@ -48,9 +51,12 @@ exports.getAllGames = (req, res) => {
         games.push(game);
       });
 
+      const sortedByCompletionGames =
+        getGamesSortedByCompletionPercentage(games);
+
       setTimeout(() => {
-        res.json(games);
-      }, 3000);
+        res.json(sortedByCompletionGames);
+      }, 500);
     }
   );
 };
