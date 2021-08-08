@@ -10,6 +10,7 @@ const router = express.Router();
 // }
 
 router.get("/database", apiController.getDatabase);
+router.get("/games/info", apiController.getAllGamesInfo);
 router.get("/games", apiController.getAllGames);
 
 //Send response for root API
