@@ -72,3 +72,23 @@ exports.getGamesSortedByNameZA = (games) => {
   newGames = games.sort(nameZAComparatorGame);
   return newGames;
 };
+
+exports.checkSelectionCriteriaFulfilled = (game, select) => {
+  if (select === "all") {
+    return true;
+  } else if (select === "completed") {
+    if (game.completion_percentage >= 80) {
+      return true;
+    }
+  } else if (select === "started") {
+    if (game.completed_achievements_count > 0) {
+      return true;
+    }
+  } else if (select == "notstarted") {
+    if (game.completed_achievements_count === 0) {
+      return true;
+    }
+  } else {
+    return false;
+  }
+};
