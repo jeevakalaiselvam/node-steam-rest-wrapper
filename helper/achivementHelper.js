@@ -2,37 +2,29 @@ const {
   nameZAComparator,
   nameAZComparator,
   sortByRecentlyUnlocked,
+  sortByRarityAchievementDesc,
+  sortByGamesAchievement,
+  nameAZComparatorAchievement,
+  nameZAComparatorAchievement,
 } = require("./comparator");
 
-exports.getGamesSortedByCompletionPercentage = (games) => {
-  let newGames = [];
-  newGames = games.sort((game1, game2) => {
-    return game2.completion_percentage - game1.completion_percentage;
-  });
+const { ACHIEVEMENTS_PAGINATION_PER_PAGE } = require("../config/pagingConfig");
 
-  return newGames;
-};
+exports.paginateAchievements = (achievements, page) => {
+  const startIndex = (page - 1) * ACHIEVEMENTS_PAGINATION_PER_PAGE;
+  const lastIndex = page * ACHIEVEMENTS_PAGINATION_PER_PAGE;
 
-exports.getGamesSortedByPlaytime = (games) => {
-  let newGames = [];
-  newGames = games.sort((game1, game2) => {
-    return game2.playtime_minutes - game1.playtime_minutes;
-  });
+  if (page === "0") {
+    return achievements;
+  }
 
-  return newGames;
-};
-
-exports.getGamesSortedByNameAZ = (games) => {
-  let newGames = [];
-  newGames = games.sort(nameAZComparator);
-
-  return newGames;
-};
-
-exports.getGamesSortedByNameZA = (games) => {
-  let newGames = [];
-  newGames = games.sort(nameZAComparator);
-  return newGames;
+  if (achievements.length < lastIndex) {
+    return achievements.slice(
+      achievements.length - ACHIEVEMENTS_PAGINATION_PER_PAGE,
+      achievements.length
+    );
+  }
+  return achievements.slice(startIndex, lastIndex);
 };
 
 exports.getAllRecentlyUnlockedAchievements = (games) => {
@@ -56,12 +48,48 @@ exports.getAllUnlockedAchievements = (games) => {
 
 exports.getNAchievementImages = (achievements, count) => {
   let images = [];
-  let start = count;
-  while (start > 0) {
-    images.push(
-      achievements[Math.floor(Math.random() * achievements.length)].icon
-    );
-    start--;
-  }
+  achievements.forEach((achievement) => {
+    images.push(achievement.icon);
+  });
   return images;
+};
+
+exports.getAchievementsSortedByRecent = (achievements) => {
+  let sortedAchievments = [];
+
+  sortedAchievments = achievements.sort(sortByRecentlyUnlocked);
+
+  return sortedAchievments;
+};
+
+exports.getAchievementsSortedByRarity = (achievements) => {
+  let sortedAchievments = [];
+
+  sortedAchievments = achievements.sort(sortByRarityAchievementDesc);
+
+  return sortedAchievments;
+};
+
+exports.getAchievementsSortedByGames = (achievements) => {
+  let sortedAchievments = [];
+
+  sortedAchievments = achievements.sort(sortByGamesAchievement);
+
+  return sortedAchievments;
+};
+
+exports.getAchievementsSortedByNameAZ = (achievements) => {
+  let sortedAchievments = [];
+
+  sortedAchievments = achievements.sort(nameAZComparatorAchievement);
+
+  return sortedAchievments;
+};
+
+exports.getAchievementsSortedByNameZA = (achievements) => {
+  let sortedAchievments = [];
+
+  sortedAchievments = achievements.sort(nameZAComparatorAchievement);
+
+  return sortedAchievments;
 };

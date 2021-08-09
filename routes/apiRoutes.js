@@ -13,6 +13,7 @@ router.get("/overlay", apiController.getImagesForOverlay);
 router.get("/database", apiController.getDatabase);
 router.get("/games/info", apiController.getAllGamesInfo);
 router.get("/games", apiController.getAllGames);
+router.get("/achievements", apiController.getAllAchievements);
 
 //Send response for root API
 router.get("/", apiController.apiRootEndpoint);

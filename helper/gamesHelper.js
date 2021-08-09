@@ -1,4 +1,5 @@
 const { GAMES_PAGINATION_PER_PAGE } = require("../config/pagingConfig");
+const { nameAZComparatorGame, nameZAComparatorGame } = require("./comparator");
 
 exports.paginateGames = (games, page) => {
   const startIndex = (page - 1) * GAMES_PAGINATION_PER_PAGE;
@@ -25,22 +26,49 @@ exports.getAllPerfectGames = (games) => {
   return perfectGames;
 };
 
-exports.getNRandomGameImages = (games, count) => {
+exports.getNGameImages = (games, count) => {
   let images = [];
-  let start = count;
-  while (start > 0) {
-    images.push(games[Math.floor(Math.random() * games.length)].image);
-    start--;
-  }
+  games.forEach((game) => {
+    images.push(game.image);
+  });
   return images;
 };
 
 exports.getNPerfectGameImages = (games, count) => {
   let images = [];
-  let start = count;
-  while (start > 0) {
-    images.push(games[Math.floor(Math.random() * games.length)].image);
-    start--;
-  }
+  games.forEach((game) => {
+    images.push(game.image);
+  });
   return images;
+};
+
+exports.getGamesSortedByCompletionPercentage = (games) => {
+  let newGames = [];
+  newGames = games.sort((game1, game2) => {
+    return game2.completion_percentage - game1.completion_percentage;
+  });
+
+  return newGames;
+};
+
+exports.getGamesSortedByPlaytime = (games) => {
+  let newGames = [];
+  newGames = games.sort((game1, game2) => {
+    return game2.playtime_minutes - game1.playtime_minutes;
+  });
+
+  return newGames;
+};
+
+exports.getGamesSortedByNameAZ = (games) => {
+  let newGames = [];
+  newGames = games.sort(nameAZComparatorGame);
+
+  return newGames;
+};
+
+exports.getGamesSortedByNameZA = (games) => {
+  let newGames = [];
+  newGames = games.sort(nameZAComparatorGame);
+  return newGames;
 };
