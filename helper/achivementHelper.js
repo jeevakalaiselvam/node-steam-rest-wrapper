@@ -93,3 +93,14 @@ exports.getAchievementsSortedByNameZA = (achievements) => {
 
   return sortedAchievments;
 };
+
+exports.getAllAchievementsRaw = (games) => {
+  let achievements = [];
+  games.map((game) => {
+    const gameAchievements = game.all_achievements;
+    gameAchievements.map((achievement) => {
+      achievements.push(achievement);
+    });
+  });
+  return achievements;
+};

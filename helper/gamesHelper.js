@@ -92,3 +92,20 @@ exports.checkSelectionCriteriaFulfilled = (game, select) => {
     return false;
   }
 };
+
+exports.checkSelectionCriteriaFulfilledForAchievement = (
+  achievement,
+  select
+) => {
+  if (select === "all") {
+    return true;
+  } else if (select === "completed") {
+    if (achievement.unlocked === 1) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+};

@@ -9,6 +9,7 @@ const {
   getAchievementsSortedByGames,
   getAchievementsSortedByNameAZ,
   getAchievementsSortedByNameZA,
+  getAllAchievementsRaw,
 } = require("../helper/achivementHelper");
 const {
   getGamesSortedByCompletionPercentage,
@@ -20,6 +21,7 @@ const {
   getNGameImages,
   getNPerfectGameImages,
   checkSelectionCriteriaFulfilled,
+  checkSelectionCriteriaFulfilledForAchievement,
 } = require("../helper/gamesHelper");
 const { writeLog } = require("../utils/fileUtils");
 
@@ -53,60 +55,6 @@ exports.getDatabase = (req, res) => {
       }
       const database = JSON.parse(data);
       res.json(database);
-    }
-  );
-};
-
-exports.getAllGames = (req, res) => {
-  const select = req.query.select ?? "";
-  const sort = req.query.sort ?? "";
-  const order = req.query.order ?? "";
-  const page = req.query.page ?? "0";
-  console.log("QUERY -> ", select, sort, order, page);
-
-  fs.readFile(
-    path.join(__dirname, "../", "store", "games.json"),
-    "utf8",
-    (err, data) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      const dbGames = JSON.parse(data).games;
-
-      let games = [];
-      dbGames.forEach((dbGame) => {
-        if (checkSelectionCriteriaFulfilled(dbGame, select)) {
-          let game = {};
-          game.name = dbGame.name;
-          game.id = dbGame.id;
-          game.image = dbGame.image;
-          game.playtime_minutes = dbGame.playtime_minutes;
-          game.total_achievements_count = dbGame.total_achievements_count;
-          game.completed_achievements_count =
-            dbGame.completed_achievements_count;
-          game.completion_percentage = dbGame.completion_percentage;
-          console.log("Adding -> ", game.name);
-          games.push(game);
-        } else {
-          console.log("NOPE");
-        }
-      });
-
-      console.log("QUERY -> ", select, sort, order, page);
-
-      let sortedGames = [];
-      if (sort === "completion")
-        sortedGames = getGamesSortedByCompletionPercentage(games);
-      if (sort === "playtime") sortedGames = getGamesSortedByPlaytime(games);
-      if (sort === "name" && order === "az")
-        sortedGames = getGamesSortedByNameAZ(games);
-      if (sort === "name" && order === "za")
-        sortedGames = getGamesSortedByNameZA(games);
-
-      const paginatedGames = paginateGames(sortedGames, page);
-
-      this.sendResponse(res, paginatedGames);
     }
   );
 };
@@ -189,7 +137,67 @@ exports.getImagesForOverlay = (req, res) => {
   );
 };
 
+exports.getAllGames = (req, res) => {
+  const select = req.query.select ?? "";
+  const sort = req.query.sort ?? "";
+  const order = req.query.order ?? "";
+  const page = req.query.page ?? "0";
+  console.log("QUERY -> ", select, sort, order, page);
+
+  fs.readFile(
+    path.join(__dirname, "../", "store", "games.json"),
+    "utf8",
+    (err, data) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      const dbGames = JSON.parse(data).games;
+
+      let games = [];
+      dbGames.forEach((dbGame) => {
+        if (checkSelectionCriteriaFulfilled(dbGame, select)) {
+          let game = {};
+          game.name = dbGame.name;
+          game.id = dbGame.id;
+          game.image = dbGame.image;
+          game.playtime_minutes = dbGame.playtime_minutes;
+          game.total_achievements_count = dbGame.total_achievements_count;
+          game.completed_achievements_count =
+            dbGame.completed_achievements_count;
+          game.completion_percentage = dbGame.completion_percentage;
+          console.log("Adding -> ", game.name);
+          games.push(game);
+        } else {
+          console.log("NOPE");
+        }
+      });
+
+      console.log("QUERY -> ", select, sort, order, page);
+
+      let sortedGames = [];
+      if (sort === "completion")
+        sortedGames = getGamesSortedByCompletionPercentage(games);
+      if (sort === "playtime") sortedGames = getGamesSortedByPlaytime(games);
+      if (sort === "name" && order === "az")
+        sortedGames = getGamesSortedByNameAZ(games);
+      if (sort === "name" && order === "za")
+        sortedGames = getGamesSortedByNameZA(games);
+
+      const totalGamesBeforePagination = sortedGames.length;
+
+      const paginatedGames = paginateGames(sortedGames, page);
+
+      this.sendResponse(res, {
+        total: totalGamesBeforePagination,
+        games: paginatedGames,
+      });
+    }
+  );
+};
+
 exports.getAllAchievements = (req, res) => {
+  const select = req.query.select ?? "";
   const sort = req.query.sort ?? "";
   const order = req.query.order ?? "";
   const page = req.query.page ?? "0";
@@ -204,14 +212,27 @@ exports.getAllAchievements = (req, res) => {
       }
       const dbGames = JSON.parse(data).games;
 
+      const achievementsBeforeFiltering = getAllAchievementsRaw(dbGames);
+
       let achievements = [];
-      dbGames.map((dbGame) => {
-        dbGame.all_achievements.forEach((achievement) => {
-          if (achievement.unlocked === 1) {
-            achievements.push(achievement);
-          }
-        });
+      console.log(
+        "ACHIEVEMENT BEFORE FILTERING LENGTH -> ",
+        achievements.length
+      );
+      achievementsBeforeFiltering.forEach((achievement) => {
+        if (
+          checkSelectionCriteriaFulfilledForAchievement(achievement, select)
+        ) {
+          achievements.push(achievement);
+        } else {
+        }
       });
+      console.log(
+        "ACHIEVEMENT AFTER FILTERING LENGTH -> ",
+        achievements.length
+      );
+
+      console.log("QUERY -> ", select, sort, order, page);
 
       let sortedAchievements = [];
       if (sort === "recent")
@@ -225,12 +246,17 @@ exports.getAllAchievements = (req, res) => {
       if (sort === "name" && order === "za")
         sortedAchievements = getAchievementsSortedByNameZA(achievements);
 
+      const totalAchievementsBeforePagination = sortedAchievements.length;
+
       const paginatedAchievements = paginateAchievements(
         sortedAchievements,
         page
       );
 
-      this.sendResponse(res, paginatedAchievements);
+      this.sendResponse(res, {
+        total: totalAchievementsBeforePagination,
+        achievements: paginatedAchievements,
+      });
     }
   );
 };
