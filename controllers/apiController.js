@@ -27,6 +27,7 @@ const {
   checkSelectionCriteriaFulfilledForAchievement,
 } = require("../helper/gamesHelper");
 const { writeLog } = require("../utils/fileUtils");
+const { getHiddenInfoByCrawling } = require("./cacheController");
 
 const ADD_TEST_DELAY = true;
 
@@ -335,12 +336,16 @@ exports.getAllAchievementsForGame = (req, res) => {
       const totalAchievementsBeforePagination = sortedAchievements.length;
       console.log(
         "TOTAL ACHIEVEMENTS FOR GAME BEFORE PAGINATION -> ",
-        totalAchievementsBeforePagination
+        totalAchievementsBeforePagination.length
       );
 
       const paginatedAchievements = paginateAchievements(
         sortedAchievements,
         page
+      );
+      console.log(
+        "TOTAL ACHIEVEMENTS FOR GAME AFTER PAGINATION -> ",
+        paginatedAchievements.length
       );
 
       this.sendResponse(res, {
@@ -349,4 +354,17 @@ exports.getAllAchievementsForGame = (req, res) => {
       });
     }
   );
+};
+
+exports.getHiddenAchievementsForGameByID = async (req, res) => {
+  console.log("GET HIDDEN ACHIEVEMENTS FOR GAME BY ID ROUTE HIT");
+  const gameID = req.query.gameid ?? "";
+  getHiddenInfoByCrawling(gameID).then((achievements) => {
+    console.log(
+      "HIDDEN ACHIVEMENT LENGTH IN ROUTE HANDLER -> ",
+      achievements.length
+    );
+
+    res.json(achievements);
+  });
 };

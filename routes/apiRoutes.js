@@ -14,14 +14,13 @@ router.get("/database", apiController.getDatabase);
 router.get("/games/info", apiController.getAllGamesInfo);
 router.get("/games", apiController.getAllGames);
 router.get("/achievements/game", apiController.getAllAchievementsForGame);
+router.get(
+  "/achievements/hidden",
+  apiController.getHiddenAchievementsForGameByID
+);
 router.get("/achievements", apiController.getAllAchievements);
 
 //Send response for root API
 router.get("/", apiController.apiRootEndpoint);
-
-//Server loading games from every 30 mins.
-setInterval(() => {
-  console.log("Getting games from Steam");
-}, 1000 * 60 * 30);
 
 module.exports = router;

@@ -15,7 +15,6 @@ const {
 const { writeLog } = require("../utils/fileUtils");
 
 exports.getAllGamesFromSteam = async () => {
-  console.clear();
   try {
     const ownedGamesResponse = await axios.get(STEAM_ALL_GAMES_URL);
     const allGamesOld = ownedGamesResponse.data;
@@ -34,7 +33,6 @@ exports.getAllGamesFromSteam = async () => {
 };
 
 exports.getAllSchemaAchievements = async (gameID) => {
-  console.clear();
   try {
     const achievements = await axios.get(STEAM_ALL_ACHIEVEMENTS_SCHEMA(gameID));
     return achievements.data.game.availableGameStats.achievements;
@@ -50,7 +48,6 @@ exports.getAllSchemaAchievements = async (gameID) => {
 };
 
 exports.getAllPlayerAchievements = async (gameID) => {
-  console.clear();
   try {
     const playerAchievements = await axios.get(
       STEAM_ALL_ACHIEVEMENTS_PLAYER(gameID)
@@ -68,7 +65,6 @@ exports.getAllPlayerAchievements = async (gameID) => {
 };
 
 exports.getAllGlobalAchievements = async (gameID) => {
-  console.clear();
   try {
     const globalAchievements = await axios.get(
       STEAM_ALL_ACHIEVEMENTS_GLOBAL(gameID)

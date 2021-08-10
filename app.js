@@ -11,7 +11,10 @@ const compression = require("compression");
 const cors = require("cors");
 const app = express();
 const apiRouter = require("./routes/apiRoutes.js");
-const { allOwnedGames } = require("./controllers/cacheController.js");
+const {
+  allOwnedGames,
+  getHiddenAchievementDataAndStore,
+} = require("./controllers/cacheController.js");
 console.clear();
 
 //Load in config
@@ -70,9 +73,10 @@ app.get("*", (req, res) => {
 });
 
 setInterval(() => {
+  console.log("CACHING DATA - CURRENT TIME -> ", new Date().toISOString());
   console.log("Getting data from Steam and storing..");
   allOwnedGames();
-}, 1000 * 60 * 60);
+}, 1000 * 60 * 30);
 
 const PORT = process.env.PORT || 8888;
 app.listen(PORT, () => console.log(`Listening on port ${PORT} 👋`));

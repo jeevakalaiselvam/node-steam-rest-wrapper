@@ -20,6 +20,10 @@ exports.paginateAchievements = (achievements, page) => {
     return achievements;
   }
 
+  if (achievements.length < ACHIEVEMENTS_PAGINATION_PER_PAGE) {
+    return achievements.slice(0, achievements.length);
+  }
+
   if (achievements.length < lastIndex) {
     return achievements.slice(
       achievements.length - ACHIEVEMENTS_PAGINATION_PER_PAGE,
