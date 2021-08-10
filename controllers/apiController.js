@@ -10,6 +10,9 @@ const {
   getAchievementsSortedByNameAZ,
   getAchievementsSortedByNameZA,
   getAllAchievementsRaw,
+  getAllAchievementsRawForAGame,
+  getAchievementsSortedByRarityEasy,
+  getAchievementsSortedByRarityHard,
 } = require("../helper/achivementHelper");
 const {
   getGamesSortedByCompletionPercentage,
@@ -199,8 +202,9 @@ exports.getAllGames = (req, res) => {
 exports.getAllAchievements = (req, res) => {
   const select = req.query.select ?? "";
   const sort = req.query.sort ?? "";
-  const order = req.query.order ?? "";
+  const order = req.query.order ?? "az";
   const page = req.query.page ?? "0";
+  const type = req.query.type ?? "easy";
 
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
@@ -216,8 +220,8 @@ exports.getAllAchievements = (req, res) => {
 
       let achievements = [];
       console.log(
-        "ACHIEVEMENT BEFORE FILTERING LENGTH -> ",
-        achievements.length
+        "ACHIEVEMENTS TOTAL BEFORE FILTERING LENGTH -> ",
+        achievementsBeforeFiltering.length
       );
       achievementsBeforeFiltering.forEach((achievement) => {
         if (
@@ -228,17 +232,21 @@ exports.getAllAchievements = (req, res) => {
         }
       });
       console.log(
-        "ACHIEVEMENT AFTER FILTERING LENGTH -> ",
+        "ACHIEVEMENT TOTAL AFTER FILTERING LENGTH -> ",
         achievements.length
       );
 
-      console.log("QUERY -> ", select, sort, order, page);
+      console.log(
+        `QUERY ->  SELECT= ${select}, SORT= ${sort}, TYPE= ${type} ORDER= ${order}, PAGE= ${page}`
+      );
 
       let sortedAchievements = [];
       if (sort === "recent")
         sortedAchievements = getAchievementsSortedByRecent(achievements);
-      if (sort === "rarity")
-        sortedAchievements = getAchievementsSortedByRarity(achievements);
+      if (sort === "rarity" && type === "easy")
+        sortedAchievements = getAchievementsSortedByRarityEasy(achievements);
+      if (sort === "rarity" && type === "hard")
+        sortedAchievements = getAchievementsSortedByRarityHard(achievements);
       if (sort === "games")
         sortedAchievements = getAchievementsSortedByGames(achievements);
       if (sort === "name" && order === "az")
@@ -247,6 +255,88 @@ exports.getAllAchievements = (req, res) => {
         sortedAchievements = getAchievementsSortedByNameZA(achievements);
 
       const totalAchievementsBeforePagination = sortedAchievements.length;
+      console.log(
+        "TOTAL ACHIEVEMENTS BEFORE PAGINATION -> ",
+        totalAchievementsBeforePagination
+      );
+
+      const paginatedAchievements = paginateAchievements(
+        sortedAchievements,
+        page
+      );
+
+      this.sendResponse(res, {
+        total: totalAchievementsBeforePagination,
+        achievements: paginatedAchievements,
+      });
+    }
+  );
+};
+
+exports.getAllAchievementsForGame = (req, res) => {
+  const game = req.query.game ?? "";
+  const select = req.query.select ?? "";
+  const sort = req.query.sort ?? "";
+  const order = req.query.order ?? "";
+  const page = req.query.page ?? "0";
+  const type = req.query.type ?? "easy";
+
+  fs.readFile(
+    path.join(__dirname, "../", "store", "games.json"),
+    "utf8",
+    (err, data) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      const dbGames = JSON.parse(data).games;
+
+      const achievementsBeforeFiltering = getAllAchievementsRawForAGame(
+        dbGames,
+        game
+      );
+
+      let achievements = [];
+      console.log(
+        "ACHIEVEMENT FOR GAME BEFORE FILTERING LENGTH -> ",
+        achievementsBeforeFiltering.length
+      );
+      achievementsBeforeFiltering.forEach((achievement) => {
+        if (
+          checkSelectionCriteriaFulfilledForAchievement(achievement, select)
+        ) {
+          achievements.push(achievement);
+        } else {
+        }
+      });
+      console.log(
+        "ACHIEVEMENTS FOR GAME AFTER FILTERING LENGTH -> ",
+        achievements.length
+      );
+
+      console.log(
+        `QUERY ->  SELECT= ${select}, SORT= ${sort}, TYPE= ${type} ORDER= ${order}, PAGE= ${page}`
+      );
+
+      let sortedAchievements = [];
+      if (sort === "recent")
+        sortedAchievements = getAchievementsSortedByRecent(achievements);
+      if (sort === "rarity" && type === "easy")
+        sortedAchievements = getAchievementsSortedByRarityEasy(achievements);
+      if (sort === "rarity" && type === "hard")
+        sortedAchievements = getAchievementsSortedByRarityHard(achievements);
+      if (sort === "games")
+        sortedAchievements = getAchievementsSortedByGames(achievements);
+      if (sort === "name" && order === "az")
+        sortedAchievements = getAchievementsSortedByNameAZ(achievements);
+      if (sort === "name" && order === "za")
+        sortedAchievements = getAchievementsSortedByNameZA(achievements);
+
+      const totalAchievementsBeforePagination = sortedAchievements.length;
+      console.log(
+        "TOTAL ACHIEVEMENTS FOR GAME BEFORE PAGINATION -> ",
+        totalAchievementsBeforePagination
+      );
 
       const paginatedAchievements = paginateAchievements(
         sortedAchievements,

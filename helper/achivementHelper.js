@@ -6,11 +6,13 @@ const {
   sortByGamesAchievement,
   nameAZComparatorAchievement,
   nameZAComparatorAchievement,
+  sortByRarityAchievementAsc,
 } = require("./comparator");
 
 const { ACHIEVEMENTS_PAGINATION_PER_PAGE } = require("../config/pagingConfig");
 
 exports.paginateAchievements = (achievements, page) => {
+  console.log("PAGINATE GOT  ->", achievements.length);
   const startIndex = (page - 1) * ACHIEVEMENTS_PAGINATION_PER_PAGE;
   const lastIndex = page * ACHIEVEMENTS_PAGINATION_PER_PAGE;
 
@@ -62,7 +64,15 @@ exports.getAchievementsSortedByRecent = (achievements) => {
   return sortedAchievments;
 };
 
-exports.getAchievementsSortedByRarity = (achievements) => {
+exports.getAchievementsSortedByRarityEasy = (achievements) => {
+  let sortedAchievments = [];
+
+  sortedAchievments = achievements.sort(sortByRarityAchievementAsc);
+
+  return sortedAchievments;
+};
+
+exports.getAchievementsSortedByRarityHard = (achievements) => {
   let sortedAchievments = [];
 
   sortedAchievments = achievements.sort(sortByRarityAchievementDesc);
@@ -101,6 +111,17 @@ exports.getAllAchievementsRaw = (games) => {
     gameAchievements.map((achievement) => {
       achievements.push(achievement);
     });
+  });
+  return achievements;
+};
+
+exports.getAllAchievementsRawForAGame = (games, gameTmp) => {
+  let achievements = [];
+
+  games.map((game) => {
+    if (+game.id === +gameTmp) {
+      achievements = game.all_achievements;
+    }
   });
   return achievements;
 };

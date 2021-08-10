@@ -99,8 +99,14 @@ exports.checkSelectionCriteriaFulfilledForAchievement = (
 ) => {
   if (select === "all") {
     return true;
-  } else if (select === "completed") {
+  } else if (select === "unlocked") {
     if (achievement.unlocked === 1) {
+      return true;
+    } else {
+      return false;
+    }
+  } else if (select === "locked") {
+    if (achievement.unlocked === 0) {
       return true;
     } else {
       return false;
