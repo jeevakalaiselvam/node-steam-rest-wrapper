@@ -282,6 +282,9 @@ exports.getAllAchievementsForGame = (req, res) => {
   const page = req.query.page ?? "0";
   const type = req.query.type ?? "easy";
 
+  let completed = 0;
+  let remaining = 0;
+
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
     "utf8",
@@ -308,6 +311,9 @@ exports.getAllAchievementsForGame = (req, res) => {
         ) {
           achievements.push(achievement);
         } else {
+        }
+        if (achievement.unlocked === 1) {
+          completed++;
         }
       });
       console.log(
@@ -348,7 +354,11 @@ exports.getAllAchievementsForGame = (req, res) => {
         paginatedAchievements.length
       );
 
+      remaining = totalAchievementsBeforePagination - completed;
+
       this.sendResponse(res, {
+        completed: completed,
+        remaining: remaining,
         total: totalAchievementsBeforePagination,
         achievements: paginatedAchievements,
       });
