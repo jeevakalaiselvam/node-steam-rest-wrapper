@@ -7,6 +7,7 @@ const {
   nameAZComparatorAchievement,
   nameZAComparatorAchievement,
   sortByRarityAchievementAsc,
+  sortByHiddenOnly,
 } = require("./comparator");
 
 const { ACHIEVEMENTS_PAGINATION_PER_PAGE } = require("../config/pagingConfig");
@@ -58,6 +59,14 @@ exports.getNAchievementImages = (achievements, count) => {
     images.push(achievement.icon);
   });
   return images;
+};
+
+exports.getAchievementsSortedByHidden = (achievements) => {
+  let sortedAchievments = [];
+
+  sortedAchievments = achievements.sort(sortByHiddenOnly);
+
+  return sortedAchievments;
 };
 
 exports.getAchievementsSortedByRecent = (achievements) => {

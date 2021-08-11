@@ -26,6 +26,10 @@ exports.sortByRecentlyUnlocked = (ach1, ach2) => {
   return ach2.unlocked_time - ach1.unlocked_time;
 };
 
+exports.sortByHiddenOnly = (ach1, ach2) => {
+  return ach2.hidden - ach1.hidden;
+};
+
 exports.sortByRarityAchievementDesc = (ach1, ach2) => {
   return ach1.global_percentage - ach2.global_percentage;
 };

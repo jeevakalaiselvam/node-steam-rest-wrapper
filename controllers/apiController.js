@@ -13,6 +13,7 @@ const {
   getAllAchievementsRawForAGame,
   getAchievementsSortedByRarityEasy,
   getAchievementsSortedByRarityHard,
+  getAchievementsSortedByHidden,
 } = require("../helper/achivementHelper");
 const {
   getGamesSortedByCompletionPercentage,
@@ -328,6 +329,8 @@ exports.getAllAchievementsForGame = (req, res) => {
       let sortedAchievements = [];
       if (sort === "recent")
         sortedAchievements = getAchievementsSortedByRecent(achievements);
+      if (sort === "hidden")
+        sortedAchievements = getAchievementsSortedByHidden(achievements);
       if (sort === "rarity" && type === "easy")
         sortedAchievements = getAchievementsSortedByRarityEasy(achievements);
       if (sort === "rarity" && type === "hard")
@@ -377,4 +380,41 @@ exports.getHiddenAchievementsForGameByID = async (req, res) => {
 
     res.json(achievements);
   });
+};
+
+exports.getAllAchievementsForAYear = (req, res) => {
+  const year = req.query.year ?? new Date().getFullYear();
+  console.log(year);
+
+  fs.readFile(
+    path.join(__dirname, "../", "store", "games.json"),
+    "utf8",
+    (err, data) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      const database = JSON.parse(data);
+      const games = database.games;
+      const achievementsForTheYear = [];
+      games.map((game) => {
+        const achievementsUnlocked = game.all_achievements.forEach(
+          (achievement) => {
+            if (
+              achievement.unlocked_time_desc &&
+              achievement.unlocked_time_desc.includes(year)
+            ) {
+              achievementsForTheYear.push(achievement);
+            }
+          }
+        );
+      });
+      const recentlyUnlockedSorted = achievementsForTheYear.sort(
+        (ach1, ach2) => {
+          return ach2.unlocked_time - ach1.unlocked_time;
+        }
+      );
+      res.json(achievementsForTheYear);
+    }
+  );
 };
