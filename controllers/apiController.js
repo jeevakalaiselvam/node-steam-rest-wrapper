@@ -95,6 +95,39 @@ exports.getAllGamesInfo = (req, res) => {
   );
 };
 
+exports.getGameInfo = (req, res) => {
+  const gameid = req.query.gameid;
+  fs.readFile(
+    path.join(__dirname, "../", "store", "games.json"),
+    "utf8",
+    (err, data) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      const dbGames = JSON.parse(data).games;
+
+      let gameInfo = {};
+
+      const game = dbGames.filter((game) => {
+        if (game.id + "" === gameid + "") {
+          console.log("TRUE");
+          return true;
+        } else {
+          return false;
+        }
+      })[0];
+
+      gameInfo.playtime_minutes = game.playtime_minutes;
+      gameInfo.total_achievements_count = game.total_achievements_count;
+      gameInfo.completed_achievements_count = game.completed_achievements_count;
+      gameInfo.completion_percentage = game.completion_percentage;
+
+      this.sendResponse(res, gameInfo);
+    }
+  );
+};
+
 exports.getImagesForOverlay = (req, res) => {
   const gamesCount = req.query.games ?? 1;
   const achievementCount = req.query.achievements ?? 1;
