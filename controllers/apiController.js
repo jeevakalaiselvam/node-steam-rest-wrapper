@@ -26,6 +26,7 @@ const {
   getNPerfectGameImages,
   checkSelectionCriteriaFulfilled,
   checkSelectionCriteriaFulfilledForAchievement,
+  checkSelectionCriteriaFulfilledForAchievementBacklog,
 } = require("../helper/gamesHelper");
 const { writeLog } = require("../utils/fileUtils");
 const { getHiddenInfoByCrawling } = require("./cacheController");
