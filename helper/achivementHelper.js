@@ -122,6 +122,7 @@ exports.getAllAchievementsRaw = (games) => {
   games.map((game) => {
     const gameAchievements = game.all_achievements;
     gameAchievements.map((achievement) => {
+      achievement.game_completion = game.completion_percentage;
       achievements.push(achievement);
     });
   });

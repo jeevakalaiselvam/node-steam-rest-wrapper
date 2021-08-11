@@ -76,28 +76,19 @@ exports.getAllGamesInfo = (req, res) => {
       const dbGames = JSON.parse(data).games;
 
       let gameInfo = {};
+      let allPercentages = [];
       let totalGames = 0;
-      let totalStartedGames = 0;
-      let totalPercentage = 0;
       let completedAchievements = 0;
-      let perfectGames = 0;
 
       dbGames.map((game) => {
+        allPercentages.push(game.completion_percentage);
         totalGames += 1;
-        if (+game.completion_percentage !== 0) {
-          totalPercentage += (+game.completion_percentage / 80) * 100;
-          totalStartedGames += 1;
-        }
         completedAchievements += game.completed_achievements_count;
-        if (game.completion_percentage >= 80) {
-          perfectGames += 1;
-        }
       });
 
       gameInfo.total_games = totalGames;
-      gameInfo.average_completion = totalPercentage / totalStartedGames;
       gameInfo.completed_achievements = completedAchievements;
-      gameInfo.perfect_games_count = perfectGames;
+      gameInfo.game_percentages = allPercentages;
 
       this.sendResponse(res, gameInfo);
     }
@@ -259,6 +250,91 @@ exports.getAllAchievements = (req, res) => {
       const totalAchievementsBeforePagination = sortedAchievements.length;
       console.log(
         "TOTAL ACHIEVEMENTS BEFORE PAGINATION -> ",
+        totalAchievementsBeforePagination
+      );
+
+      const paginatedAchievements = paginateAchievements(
+        sortedAchievements,
+        page
+      );
+
+      this.sendResponse(res, {
+        total: totalAchievementsBeforePagination,
+        achievements: paginatedAchievements,
+      });
+    }
+  );
+};
+
+exports.getAllAchievementsBacklog = (req, res) => {
+  const select = req.query.select ?? "";
+  const sort = req.query.sort ?? "";
+  const order = req.query.order ?? "az";
+  const page = req.query.page ?? "0";
+  const type = req.query.type ?? "easy";
+
+  fs.readFile(
+    path.join(__dirname, "../", "store", "games.json"),
+    "utf8",
+    (err, data) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      const dbGames = JSON.parse(data).games;
+
+      const startedGames = dbGames.filter((game) => {
+        if (game.completed_achievements_count > 0) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      const achievementsBeforeFiltering = getAllAchievementsRaw(startedGames);
+
+      let achievements = [];
+      console.log(
+        "ACHIEVEMENTS BACKLOG BEFORE FILTERING LENGTH -> ",
+        achievementsBeforeFiltering.length
+      );
+      achievementsBeforeFiltering.forEach((achievement) => {
+        if (
+          checkSelectionCriteriaFulfilledForAchievementBacklog(
+            achievement,
+            select
+          )
+        ) {
+          achievements.push(achievement);
+        } else {
+        }
+      });
+      console.log(
+        "ACHIEVEMENT BACKLOG AFTER FILTERING LENGTH -> ",
+        achievements.length
+      );
+
+      console.log(
+        `QUERY ->  SELECT= ${select}, SORT= ${sort}, TYPE= ${type} ORDER= ${order}, PAGE= ${page}`
+      );
+
+      let sortedAchievements = [];
+      if (sort === "recent")
+        sortedAchievements = getAchievementsSortedByRecent(achievements);
+      if (sort === "rarity" && type === "easy")
+        sortedAchievements = getAchievementsSortedByRarityEasy(achievements);
+      if (sort === "rarity" && type === "hard")
+        sortedAchievements = getAchievementsSortedByRarityHard(achievements);
+      if (sort === "games")
+        sortedAchievements = getAchievementsSortedByGames(achievements);
+      if (sort === "name" && order === "az")
+        sortedAchievements = getAchievementsSortedByNameAZ(achievements);
+      if (sort === "name" && order === "za")
+        sortedAchievements = getAchievementsSortedByNameZA(achievements);
+
+      const totalAchievementsBeforePagination = sortedAchievements.length;
+      console.log(
+        "TOTAL ACHIEVEMENTS BACKLOG BEFORE PAGINATION -> ",
         totalAchievementsBeforePagination
       );
 

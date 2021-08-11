@@ -115,3 +115,14 @@ exports.checkSelectionCriteriaFulfilledForAchievement = (
     return false;
   }
 };
+
+exports.checkSelectionCriteriaFulfilledForAchievementBacklog = (
+  achievement,
+  select
+) => {
+  if (achievement.unlocked === 0) {
+    return true;
+  } else {
+    return false;
+  }
+};

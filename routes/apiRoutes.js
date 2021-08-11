@@ -21,6 +21,8 @@ router.get(
 );
 router.get("/achievements", apiController.getAllAchievements);
 
+router.get("/backlog", apiController.getAllAchievementsBacklog);
+
 //Send response for root API
 router.get("/", apiController.apiRootEndpoint);
 
