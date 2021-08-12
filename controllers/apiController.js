@@ -34,7 +34,10 @@ const {
 } = require("../helper/gamesHelper");
 const { LOG } = require("../helper/logger");
 const { writeLog } = require("../utils/fileUtils");
-const { getHiddenInfoByCrawling } = require("./cacheController");
+const {
+  getHiddenInfoByCrawling,
+  refreshDatabaseAndStore,
+} = require("./cacheController");
 
 const ADD_TEST_DELAY = true;
 
@@ -97,6 +100,13 @@ exports.getAllGamesInfo = (req, res) => {
       this.sendResponse(res, gameInfo);
     }
   );
+};
+
+exports.refreshDatabase = (req, res) => {
+  refreshDatabaseAndStore();
+  res.status(200).json({
+    status: "success",
+  });
 };
 
 exports.getGameInfo = (req, res) => {
@@ -328,11 +338,7 @@ exports.getAllAchievementsBacklog = (req, res) => {
         sortedAchievements = getAchievementsSortedByRarityEasy(achievements);
       if (sort === "rarity" && type === "hard")
         sortedAchievements = getAchievementsSortedByRarityHard(achievements);
-      if (sort === "games")
-        sortedAchievements = await getAchievementsSortedByGamesAndTarget(
-          startedGames,
-          target
-        );
+      if (sort === "games") sortedAchievements = achievements;
       if (sort === "name" && order === "az")
         sortedAchievements = getAchievementsSortedByNameAZ(achievements);
       if (sort === "name" && order === "za")

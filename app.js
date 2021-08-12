@@ -14,6 +14,7 @@ const apiRouter = require("./routes/apiRoutes.js");
 const {
   allOwnedGames,
   getHiddenAchievementDataAndStore,
+  refreshDatabaseAndStore,
 } = require("./controllers/cacheController.js");
 const { log } = require("console");
 const { LOG } = require("./helper/logger.js");
@@ -77,7 +78,7 @@ app.get("*", (req, res) => {
 setInterval(() => {
   LOG("CACHING DATA - CURRENT TIME -> ", new Date().toISOString());
   LOG("Getting data from Steam and storing..");
-  allOwnedGames();
+  refreshDatabaseAndStore();
 }, 1000 * 60 * 60);
 
 const PORT = process.env.PORT || 8888;

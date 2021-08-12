@@ -36,73 +36,80 @@ exports.sendTestResponse = async (req, res, next) => {
 };
 
 //Get all games
-exports.allOwnedGames = async () => {
-  const allGames = await getAllGamesFromSteam();
-
-  let newFormatGames = {};
-  newFormatGames.total_games = allGames.total_count;
-
-  //USE SPLICE HERE WHEN TESTING
-
-  newFormatGames.games = allGames.games.map((game, index) => {
-    const newGame = {};
-    newGame.name = game.name;
-    newGame.game_id = game.appid;
-    newGame.header_image = STEAM_GAME_HEADER_IMAGE(game.appid);
-    newGame.playtime_minutes = game.playtime_forever;
-
-    return newGame;
-  });
-
-  newFormatGames = await Promise.all(
-    newFormatGames.games.map(async (game) => {
-      const schemaAchievements = await getAllSchemaAchievements(game.game_id);
-      game.schema_achievements = schemaAchievements;
-      return game;
-    })
-  );
-
-  newFormatGames = await Promise.all(
-    newFormatGames.map(async (game) => {
-      const globalAchievements = await getAllGlobalAchievements(game.game_id);
-      game.global_achievements = globalAchievements;
-      return game;
-    })
-  );
-
-  newFormatGames = await Promise.all(
-    newFormatGames.map(async (game) => {
-      const playerAchievements = await getAllPlayerAchievements(game.game_id);
-      game.player_achievements = playerAchievements;
-      return game;
-    })
-  );
-  const transformedGames = mergeFilterAndCalculate(newFormatGames);
-
-  const currentdate = new Date();
-  const datetime =
-    "Last Sync: " +
-    currentdate.getDate() +
-    "/" +
-    (currentdate.getMonth() + 1) +
-    "/" +
-    currentdate.getFullYear() +
-    " @ " +
-    currentdate.getHours() +
-    ":" +
-    currentdate.getMinutes() +
-    ":" +
-    currentdate.getSeconds();
-
-  const responseToCache = {
-    games: transformedGames,
-    timestamp: datetime,
-  };
-
+exports.refreshDatabaseAndStore = async () => {
   try {
-    const data = fs.writeFileSync(
+    LOG("REFRESHING DATABASE");
+    const allGames = await getAllGamesFromSteam();
+
+    let newFormatGames = {};
+    newFormatGames.total_games = allGames.total_count;
+
+    //USE SPLICE HERE WHEN TESTING
+
+    newFormatGames.games = allGames.games.map((game, index) => {
+      const newGame = {};
+      newGame.name = game.name;
+      newGame.game_id = game.appid;
+      newGame.header_image = STEAM_GAME_HEADER_IMAGE(game.appid);
+      newGame.playtime_minutes = game.playtime_forever;
+
+      return newGame;
+    });
+
+    newFormatGames = await Promise.all(
+      newFormatGames.games.map(async (game) => {
+        const schemaAchievements = await getAllSchemaAchievements(game.game_id);
+        game.schema_achievements = schemaAchievements;
+        return game;
+      })
+    );
+
+    newFormatGames = await Promise.all(
+      newFormatGames.map(async (game) => {
+        const globalAchievements = await getAllGlobalAchievements(game.game_id);
+        game.global_achievements = globalAchievements;
+        return game;
+      })
+    );
+
+    newFormatGames = await Promise.all(
+      newFormatGames.map(async (game) => {
+        const playerAchievements = await getAllPlayerAchievements(game.game_id);
+        game.player_achievements = playerAchievements;
+        return game;
+      })
+    );
+
+    LOG("MERGING ALL INFORMATION FOR DATABASE");
+    const transformedGames = mergeFilterAndCalculate(newFormatGames);
+
+    const currentdate = new Date();
+    const datetime =
+      "Last Sync: " +
+      currentdate.getDate() +
+      "/" +
+      (currentdate.getMonth() + 1) +
+      "/" +
+      currentdate.getFullYear() +
+      " @ " +
+      currentdate.getHours() +
+      ":" +
+      currentdate.getMinutes() +
+      ":" +
+      currentdate.getSeconds();
+
+    const responseToCache = {
+      games: transformedGames,
+      timestamp: datetime,
+    };
+
+    LOG("WRITING GATHERED INFO INTO DATABASE");
+    const data = fs.writeFile(
       path.join(__dirname, "../", "store", "games.json"),
-      JSON.stringify(responseToCache)
+      JSON.stringify(responseToCache),
+      (error) => {
+        LOG("WRITING AND SYNCING INTO DATABASE SUCCESSS");
+      }
     );
     //this.getHiddenAchievementsForGame();
     //file written successfully
