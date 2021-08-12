@@ -31,6 +31,7 @@ const {
   checkSelectionCriteriaFulfilledForAchievement,
   checkSelectionCriteriaFulfilledForAchievementBacklog,
 } = require("../helper/gamesHelper");
+const { LOG } = require("../helper/logger");
 const { writeLog } = require("../utils/fileUtils");
 const { getHiddenInfoByCrawling } = require("./cacheController");
 
@@ -344,6 +345,7 @@ exports.getAllAchievementsBacklog = (req, res) => {
 };
 
 exports.getAllAchievementsNext = (req, res) => {
+  LOG("NEXT ROUTE HIT");
   const page = req.query.page ?? "1";
   const target = req.query.target ?? "50";
   fs.readFile(
@@ -354,6 +356,7 @@ exports.getAllAchievementsNext = (req, res) => {
         return;
       }
       const dbGames = JSON.parse(data).games;
+      LOG("ALL GAMES -> ", dbGames.length);
 
       const startedGames = dbGames.filter((game) => {
         if (
@@ -365,6 +368,7 @@ exports.getAllAchievementsNext = (req, res) => {
           return false;
         }
       });
+      LOG("STARTED GAMES -> ", startedGames.length);
 
       const gamesSortedByCompletion = getGamesSortedByCompletionPercentage(
         startedGames
@@ -378,19 +382,25 @@ exports.getAllAchievementsNext = (req, res) => {
       sortedAchievements = achievementsBeforeFiltering;
 
       const totalAchievementsBeforePagination = sortedAchievements.length;
+      console.log(
+        "ACHIEVEMENTS BEFORE PAGINATION -> ",
+        totalAchievementsBeforePagination
+      );
 
       const paginatedAchievements = paginateAchievementsNext(
         sortedAchievements,
         page
       );
 
-      const descriptionAddedAchievements = getDescForHiddenAchievements(
-        paginatedAchievements
+      console.log("AFTER PAGINATION -> ", paginateAchievements.length);
+
+      const descriptionAddedAchievement = await getDescForHiddenAchievements(
+        paginatedAchievements[0]
       );
 
       this.sendResponse(res, {
         total: totalAchievementsBeforePagination,
-        achievements: descriptionAddedAchievements,
+        achievements: [descriptionAddedAchievement],
       });
     }
   );

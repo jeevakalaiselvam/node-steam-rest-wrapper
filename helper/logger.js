@@ -1,6 +1,6 @@
 const chalk = require("chalk");
 
-exports.LOG = (data) => {
+exports.LOG = (...data) => {
   const red = Math.ceil(Math.random() * 255);
   const green = Math.ceil(Math.random() * 255);
   const blue = Math.ceil(Math.random() * 255);
@@ -11,5 +11,5 @@ exports.LOG = (data) => {
       blue
     )("----------------------------------------------------------")
   );
-  console.log(chalk.rgb(red, green, blue)(data));
+  console.log(chalk.rgb(red, green, blue)(...data));
 };

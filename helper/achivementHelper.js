@@ -38,24 +38,13 @@ exports.paginateAchievements = (achievements, page) => {
 };
 
 exports.paginateAchievementsNext = (achievements, page) => {
-  const startIndex = (page - 1) * ACHIEVEMENTS_PAGINATION_PER_PAGE_NEXT;
-  const lastIndex = page * ACHIEVEMENTS_PAGINATION_PER_PAGE_NEXT;
-
-  if (page === "0") {
-    return achievements;
-  }
-
-  if (achievements.length < ACHIEVEMENTS_PAGINATION_PER_PAGE_NEXT) {
-    return achievements.slice(0, achievements.length);
-  }
-
-  if (achievements.length < lastIndex) {
-    return achievements.slice(
-      achievements.length - ACHIEVEMENTS_PAGINATION_PER_PAGE_NEXT,
-      achievements.length
-    );
-  }
-  return achievements.slice(startIndex, lastIndex);
+  console.log(
+    "ACHIEVEMENTS IN PAGINATION -> ",
+    achievements.length,
+    "PAGE -> ",
+    page
+  );
+  return [achievements[page - 1]];
 };
 
 exports.getAllRecentlyUnlockedAchievements = (games) => {
@@ -169,25 +158,21 @@ exports.getAllAchievementsRawForAGame = (games, gameTmp) => {
   return achievements;
 };
 
-exports.getDescForHiddenAchievements = async (achievements) => {
-  let hiddenAddedAchievements = [];
+exports.getDescForHiddenAchievements = async (achievement) => {
+  const gameId = achievement.game_id;
 
-  hiddenAddedAchievements = await achievements.map(async (achievement) => {
-    const gameId = achievement.game_id;
+  const hiddenAchievements = await getHiddenInfoByCrawling(gameId);
 
-    const hiddenAchievements = await getHiddenInfoByCrawling(gameId);
-
-    hiddenAchievements.map((achievementInner) => {
-      if (
-        achievementInner.name.toLowerCase().trim() ===
-          achievement.name.toLowerCase().trim() &&
-        achievement.hidden === 1
-      ) {
-        achievement.description = achievementInner.description;
-      } else {
-      }
-    });
+  hiddenAchievements.map((achievementInner) => {
+    if (
+      achievementInner.name.toLowerCase().trim() ===
+        achievement.name.toLowerCase().trim() &&
+      achievement.hidden === 1
+    ) {
+      achievement.description = achievementInner.description;
+    } else {
+    }
   });
 
-  return hiddenAddedAchievements;
+  return achievement;
 };
