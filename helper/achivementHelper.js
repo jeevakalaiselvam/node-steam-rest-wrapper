@@ -15,6 +15,8 @@ const {
   ACHIEVEMENTS_PAGINATION_PER_PAGE_NEXT,
 } = require("../config/pagingConfig");
 const { getHiddenInfoByCrawling } = require("../controllers/cacheController");
+const { LOG } = require("./logger");
+const { getGamesSortedByCompletionPercentage } = require("./gamesHelper");
 
 exports.paginateAchievements = (achievements, page) => {
   const startIndex = (page - 1) * ACHIEVEMENTS_PAGINATION_PER_PAGE;
@@ -38,12 +40,6 @@ exports.paginateAchievements = (achievements, page) => {
 };
 
 exports.paginateAchievementsNext = (achievements, page) => {
-  console.log(
-    "ACHIEVEMENTS IN PAGINATION -> ",
-    achievements.length,
-    "PAGE -> ",
-    page
-  );
   return [achievements[page - 1]];
 };
 
@@ -112,6 +108,42 @@ exports.getAchievementsSortedByGames = (achievements) => {
   sortedAchievments = achievements.sort(sortByGamesAchievement);
 
   return sortedAchievments;
+};
+
+exports.getAchievementsSortedByGamesAndTarget = (games, target) => {
+  let sortedGamesForTarget = this.getGamesForTarget(games, target);
+
+  let allAchievements = [];
+
+  sortedGamesForTarget.forEach((game) => {
+    game.all_achievements.forEach((achievement) => {
+      if (achievement.unlocked === 0) allAchievements.push(achievement);
+    });
+  });
+
+  return allAchievements;
+};
+
+exports.getGamesForTarget = (games, target) => {
+  LOG("GAMES LENGTH BEFORE SORTING -> ", games.length);
+  let filteredGames = games.filter((game) => {
+    LOG(
+      `CHECKING GAME ${game.name} -> ${game.completion_percentage} AND ${target}`
+    );
+    if (game.completion_percentage < Number(target)) {
+      LOG("ADDING -> ", game.name);
+      return true;
+    }
+    return false;
+  });
+
+  filteredGames = filteredGames.sort((game1, game2) => {
+    return game2.completion_percentage - game1.completion_percentage;
+  });
+
+  LOG(filteredGames[0].name);
+
+  return filteredGames;
 };
 
 exports.getAchievementsSortedByNameAZ = (achievements) => {

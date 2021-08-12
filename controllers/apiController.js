@@ -17,6 +17,7 @@ const {
   paginateAchievementsNext,
   getDescForHiddenAchievement,
   getDescForHiddenAchievements,
+  getAchievementsSortedByGamesAndTarget,
 } = require("../helper/achivementHelper");
 const {
   getGamesSortedByCompletionPercentage,
@@ -282,6 +283,7 @@ exports.getAllAchievementsBacklog = (req, res) => {
   const order = req.query.order ?? "az";
   const page = req.query.page ?? "0";
   const type = req.query.type ?? "easy";
+  const target = req.query.target ?? 50;
 
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
@@ -323,7 +325,10 @@ exports.getAllAchievementsBacklog = (req, res) => {
       if (sort === "rarity" && type === "hard")
         sortedAchievements = getAchievementsSortedByRarityHard(achievements);
       if (sort === "games")
-        sortedAchievements = getAchievementsSortedByGames(achievements);
+        sortedAchievements = getAchievementsSortedByGamesAndTarget(
+          startedGames,
+          target
+        );
       if (sort === "name" && order === "az")
         sortedAchievements = getAchievementsSortedByNameAZ(achievements);
       if (sort === "name" && order === "za")
@@ -382,17 +387,11 @@ exports.getAllAchievementsNext = (req, res) => {
       sortedAchievements = achievementsBeforeFiltering;
 
       const totalAchievementsBeforePagination = sortedAchievements.length;
-      console.log(
-        "ACHIEVEMENTS BEFORE PAGINATION -> ",
-        totalAchievementsBeforePagination
-      );
 
       const paginatedAchievements = paginateAchievementsNext(
         sortedAchievements,
         page
       );
-
-      console.log("AFTER PAGINATION -> ", paginateAchievements.length);
 
       const descriptionAddedAchievement = await getDescForHiddenAchievements(
         paginatedAchievements[0]

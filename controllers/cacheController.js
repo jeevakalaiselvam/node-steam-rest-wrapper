@@ -278,7 +278,7 @@ exports.getHiddenAchievementsForGame = (gameId) => {
               game.hidden_achievements = hidden_achievements;
             }
           },
-          (error) => console.log(error.message)
+          (error) => {}
         );
       });
 
