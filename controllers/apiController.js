@@ -302,7 +302,11 @@ exports.getAllAchievementsBacklog = (req, res) => {
         }
       });
 
-      const achievementsBeforeFiltering = getAllAchievementsRaw(startedGames);
+      let achievementsBeforeFiltering = getAllAchievementsRaw(startedGames);
+      achievementsBeforeFiltering = await getAchievementsSortedByGamesAndTarget(
+        startedGames,
+        target
+      );
 
       let achievements = [];
       achievementsBeforeFiltering.forEach((achievement) => {
