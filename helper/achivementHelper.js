@@ -139,24 +139,29 @@ exports.getGamesForTarget = async (games, target) => {
     return game2.completion_percentage - game1.completion_percentage;
   });
 
-  const allAchievements = [];
+  const allAchievements = {};
 
-  const achievementArraysForGames = await Promise.all(
+  await Promise.all(
     filteredGames.map(async (game) => {
       const allAchievementsForGame = await getHiddenInfoByCrawling(game.id);
-      return allAchievementsForGame;
+      allAchievementsForGame.forEach((achievement) => {
+        allAchievements[game.id + achievement.name] = achievement.description;
+      });
+      return "";
     })
   );
 
-  const mergesArrays = [];
-  achievementArraysForGames.forEach((achievements) => {
-    achievements.forEach((achievement) => {
-      mergesArrays.push(achievement);
-    });
-  });
-  console.log(mergesArrays);
+  console.log(allAchievements);
 
-  return filteredGames;
+  const hiddenAchievementAddedGames = filteredGames.map((game) => {
+    game.all_achievements = game.all_achievements.map((achievement) => {
+      achievement.description = allAchievements[game.id + achievement.name];
+      return achievement;
+    });
+    return game;
+  });
+
+  return hiddenAchievementAddedGames;
 };
 
 exports.getAchievementsSortedByNameAZ = (achievements) => {
