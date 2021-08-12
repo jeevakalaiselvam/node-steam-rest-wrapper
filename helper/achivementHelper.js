@@ -139,8 +139,22 @@ exports.getGamesForTarget = async (games, target) => {
     return game2.completion_percentage - game1.completion_percentage;
   });
 
-  const hiddenAchievements = await getHiddenInfoByCrawling(filteredGames[0].id);
-  console.log(hiddenAchievements);
+  const allAchievements = [];
+
+  const achievementArraysForGames = await Promise.all(
+    filteredGames.map(async (game) => {
+      const allAchievementsForGame = await getHiddenInfoByCrawling(game.id);
+      return allAchievementsForGame;
+    })
+  );
+
+  const mergesArrays = [];
+  achievementArraysForGames.forEach((achievements) => {
+    achievements.forEach((achievement) => {
+      mergesArrays.push(achievement);
+    });
+  });
+  console.log(mergesArrays);
 
   return filteredGames;
 };

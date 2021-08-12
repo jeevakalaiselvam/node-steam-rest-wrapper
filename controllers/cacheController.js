@@ -302,7 +302,6 @@ exports.getHiddenInfoByCrawling = async (gameId) => {
   LOG("GETTING HIDDEN FOR -> ", gameId);
   const url = `https://completionist.me/steam/app/${gameId}/achievements?display=mosaic&sort=created&order=desc`;
   const hiddenResponse = await axios.get(url);
-
   const html = hiddenResponse.data;
   const $ = cheerio.load(html);
   let titles = [];
