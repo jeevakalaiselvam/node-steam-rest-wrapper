@@ -528,3 +528,43 @@ exports.getAllAchievementsForAYear = (req, res) => {
     }
   );
 };
+
+exports.getAllMilestoneAchievements = (req, res) => {
+  fs.readFile(
+    path.join(__dirname, "../", "store", "games.json"),
+    "utf8",
+    (err, data) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      const database = JSON.parse(data);
+      const games = database.games;
+      const allAchievements = [];
+      games.map((game) => {
+        const achievementsUnlocked = game.all_achievements.forEach(
+          (achievement) => {
+            if (achievement.unlocked === 1) {
+              allAchievements.push(achievement);
+            }
+          }
+        );
+      });
+      const recentlyUnlockedSorted = allAchievements.sort((ach1, ach2) => {
+        return ach2.unlocked_time - ach1.unlocked_time;
+      });
+
+      const everyTenthAchievement = recentlyUnlockedSorted.filter(
+        (achievement, index) => {
+          if (index % 10 === 0) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      );
+
+      res.json(everyTenthAchievement);
+    }
+  );
+};

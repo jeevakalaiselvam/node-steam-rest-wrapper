@@ -20,6 +20,10 @@ router.get(
   "/achievements/hidden",
   apiController.getHiddenAchievementsForGameByID
 );
+router.get(
+  "/achievements/milestones",
+  apiController.getAllMilestoneAchievements
+);
 router.get("/achievements", apiController.getAllAchievements);
 
 router.get("/backlog", apiController.getAllAchievementsBacklog);
