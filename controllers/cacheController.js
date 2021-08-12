@@ -16,6 +16,7 @@ const { writeLog, writeHiddenData } = require("../utils/fileUtils");
 const fs = require("fs");
 const path = require("path");
 const { nameAZComparatorGame } = require("../helper/comparator");
+const { LOG } = require("../helper/logger");
 
 exports.sendTestResponse = async (req, res, next) => {
   fs.readFile(
@@ -298,7 +299,7 @@ exports.getHiddenAchievementsForGame = (gameId) => {
 
 exports.getHiddenInfoByCrawling = async (gameId) => {
   const hiddenAchievements = [];
-
+  LOG("GETTING HIDDEN FOR -> ", gameId);
   const url = `https://completionist.me/steam/app/${gameId}/achievements?display=mosaic&sort=created&order=desc`;
   const hiddenResponse = await axios.get(url);
 

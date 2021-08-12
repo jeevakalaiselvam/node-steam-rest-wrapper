@@ -288,7 +288,7 @@ exports.getAllAchievementsBacklog = (req, res) => {
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
     "utf8",
-    (err, data) => {
+    async (err, data) => {
       if (err) {
         return;
       }
@@ -325,7 +325,7 @@ exports.getAllAchievementsBacklog = (req, res) => {
       if (sort === "rarity" && type === "hard")
         sortedAchievements = getAchievementsSortedByRarityHard(achievements);
       if (sort === "games")
-        sortedAchievements = getAchievementsSortedByGamesAndTarget(
+        sortedAchievements = await getAchievementsSortedByGamesAndTarget(
           startedGames,
           target
         );
