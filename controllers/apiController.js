@@ -14,6 +14,7 @@ const {
   getAchievementsSortedByRarityEasy,
   getAchievementsSortedByRarityHard,
   getAchievementsSortedByHidden,
+  paginateAchievementsNext,
 } = require("../helper/achivementHelper");
 const {
   getGamesSortedByCompletionPercentage,
@@ -373,6 +374,58 @@ exports.getAllAchievementsBacklog = (req, res) => {
       );
 
       const paginatedAchievements = paginateAchievements(
+        sortedAchievements,
+        page
+      );
+
+      this.sendResponse(res, {
+        total: totalAchievementsBeforePagination,
+        achievements: paginatedAchievements,
+      });
+    }
+  );
+};
+
+exports.getAllAchievementsNext = (req, res) => {
+  const page = req.query.page ?? "1";
+
+  fs.readFile(
+    path.join(__dirname, "../", "store", "games.json"),
+    "utf8",
+    (err, data) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      const dbGames = JSON.parse(data).games;
+
+      const startedGames = dbGames.filter((game) => {
+        if (game.completed_achievements_count > 0) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      const achievementsBeforeFiltering = getAllAchievementsRaw(startedGames);
+
+      console.log(
+        "ACHIEVEMENTS NEXT BEFORE FILTERING LENGTH -> ",
+        achievementsBeforeFiltering.length
+      );
+
+      let sortedAchievements = [];
+      sortedAchievements = getAchievementsSortedByRarityEasy(
+        achievementsBeforeFiltering
+      );
+
+      const totalAchievementsBeforePagination = sortedAchievements.length;
+      console.log(
+        "TOTAL ACHIEVEMENTS NEXT BEFORE PAGINATION -> ",
+        totalAchievementsBeforePagination
+      );
+
+      const paginatedAchievements = paginateAchievementsNext(
         sortedAchievements,
         page
       );

@@ -10,7 +10,10 @@ const {
   sortByHiddenOnly,
 } = require("./comparator");
 
-const { ACHIEVEMENTS_PAGINATION_PER_PAGE } = require("../config/pagingConfig");
+const {
+  ACHIEVEMENTS_PAGINATION_PER_PAGE,
+  ACHIEVEMENTS_PAGINATION_PER_PAGE_NEXT,
+} = require("../config/pagingConfig");
 
 exports.paginateAchievements = (achievements, page) => {
   console.log("PAGINATE GOT  ->", achievements.length);
@@ -28,6 +31,28 @@ exports.paginateAchievements = (achievements, page) => {
   if (achievements.length < lastIndex) {
     return achievements.slice(
       achievements.length - ACHIEVEMENTS_PAGINATION_PER_PAGE,
+      achievements.length
+    );
+  }
+  return achievements.slice(startIndex, lastIndex);
+};
+
+exports.paginateAchievementsNext = (achievements, page) => {
+  console.log("PAGINATE GOT  ->", achievements.length);
+  const startIndex = (page - 1) * ACHIEVEMENTS_PAGINATION_PER_PAGE_NEXT;
+  const lastIndex = page * ACHIEVEMENTS_PAGINATION_PER_PAGE_NEXT;
+
+  if (page === "0") {
+    return achievements;
+  }
+
+  if (achievements.length < ACHIEVEMENTS_PAGINATION_PER_PAGE_NEXT) {
+    return achievements.slice(0, achievements.length);
+  }
+
+  if (achievements.length < lastIndex) {
+    return achievements.slice(
+      achievements.length - ACHIEVEMENTS_PAGINATION_PER_PAGE_NEXT,
       achievements.length
     );
   }
@@ -123,7 +148,9 @@ exports.getAllAchievementsRaw = (games) => {
     const gameAchievements = game.all_achievements;
     gameAchievements.map((achievement) => {
       achievement.game_completion = game.completion_percentage;
-      achievements.push(achievement);
+      if (achievement.unlocked === 0) {
+        achievements.push(achievement);
+      }
     });
   });
   return achievements;
