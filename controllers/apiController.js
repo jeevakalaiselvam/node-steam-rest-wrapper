@@ -15,6 +15,8 @@ const {
   getAchievementsSortedByRarityHard,
   getAchievementsSortedByHidden,
   paginateAchievementsNext,
+  getDescForHiddenAchievement,
+  getDescForHiddenAchievements,
 } = require("../helper/achivementHelper");
 const {
   getGamesSortedByCompletionPercentage,
@@ -57,7 +59,6 @@ exports.getDatabase = (req, res) => {
     "utf8",
     (err, data) => {
       if (err) {
-        console.error(err);
         return;
       }
       const database = JSON.parse(data);
@@ -72,7 +73,6 @@ exports.getAllGamesInfo = (req, res) => {
     "utf8",
     (err, data) => {
       if (err) {
-        console.error(err);
         return;
       }
       const dbGames = JSON.parse(data).games;
@@ -104,7 +104,6 @@ exports.getGameInfo = (req, res) => {
     "utf8",
     (err, data) => {
       if (err) {
-        console.error(err);
         return;
       }
       const dbGames = JSON.parse(data).games;
@@ -113,7 +112,6 @@ exports.getGameInfo = (req, res) => {
 
       const game = dbGames.filter((game) => {
         if (game.id + "" === gameid + "") {
-          console.log("TRUE");
           return true;
         } else {
           return false;
@@ -140,7 +138,6 @@ exports.getImagesForOverlay = (req, res) => {
     "utf8",
     (err, data) => {
       if (err) {
-        console.error(err);
         return;
       }
       const allGames = JSON.parse(data).games;
@@ -173,14 +170,12 @@ exports.getAllGames = (req, res) => {
   const sort = req.query.sort ?? "";
   const order = req.query.order ?? "";
   const page = req.query.page ?? "0";
-  console.log("QUERY -> ", select, sort, order, page);
 
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
     "utf8",
     (err, data) => {
       if (err) {
-        console.error(err);
         return;
       }
       const dbGames = JSON.parse(data).games;
@@ -197,14 +192,10 @@ exports.getAllGames = (req, res) => {
           game.completed_achievements_count =
             dbGame.completed_achievements_count;
           game.completion_percentage = dbGame.completion_percentage;
-          console.log("Adding -> ", game.name);
           games.push(game);
         } else {
-          console.log("NOPE");
         }
       });
-
-      console.log("QUERY -> ", select, sort, order, page);
 
       let sortedGames = [];
       if (sort === "completion")
@@ -239,7 +230,6 @@ exports.getAllAchievements = (req, res) => {
     "utf8",
     (err, data) => {
       if (err) {
-        console.error(err);
         return;
       }
       const dbGames = JSON.parse(data).games;
@@ -247,10 +237,6 @@ exports.getAllAchievements = (req, res) => {
       const achievementsBeforeFiltering = getAllAchievementsRaw(dbGames);
 
       let achievements = [];
-      console.log(
-        "ACHIEVEMENTS TOTAL BEFORE FILTERING LENGTH -> ",
-        achievementsBeforeFiltering.length
-      );
       achievementsBeforeFiltering.forEach((achievement) => {
         if (
           checkSelectionCriteriaFulfilledForAchievement(achievement, select)
@@ -259,14 +245,6 @@ exports.getAllAchievements = (req, res) => {
         } else {
         }
       });
-      console.log(
-        "ACHIEVEMENT TOTAL AFTER FILTERING LENGTH -> ",
-        achievements.length
-      );
-
-      console.log(
-        `QUERY ->  SELECT= ${select}, SORT= ${sort}, TYPE= ${type} ORDER= ${order}, PAGE= ${page}`
-      );
 
       let sortedAchievements = [];
       if (sort === "recent")
@@ -283,10 +261,6 @@ exports.getAllAchievements = (req, res) => {
         sortedAchievements = getAchievementsSortedByNameZA(achievements);
 
       const totalAchievementsBeforePagination = sortedAchievements.length;
-      console.log(
-        "TOTAL ACHIEVEMENTS BEFORE PAGINATION -> ",
-        totalAchievementsBeforePagination
-      );
 
       const paginatedAchievements = paginateAchievements(
         sortedAchievements,
@@ -313,7 +287,6 @@ exports.getAllAchievementsBacklog = (req, res) => {
     "utf8",
     (err, data) => {
       if (err) {
-        console.error(err);
         return;
       }
       const dbGames = JSON.parse(data).games;
@@ -329,10 +302,6 @@ exports.getAllAchievementsBacklog = (req, res) => {
       const achievementsBeforeFiltering = getAllAchievementsRaw(startedGames);
 
       let achievements = [];
-      console.log(
-        "ACHIEVEMENTS BACKLOG BEFORE FILTERING LENGTH -> ",
-        achievementsBeforeFiltering.length
-      );
       achievementsBeforeFiltering.forEach((achievement) => {
         if (
           checkSelectionCriteriaFulfilledForAchievementBacklog(
@@ -344,14 +313,6 @@ exports.getAllAchievementsBacklog = (req, res) => {
         } else {
         }
       });
-      console.log(
-        "ACHIEVEMENT BACKLOG AFTER FILTERING LENGTH -> ",
-        achievements.length
-      );
-
-      console.log(
-        `QUERY ->  SELECT= ${select}, SORT= ${sort}, TYPE= ${type} ORDER= ${order}, PAGE= ${page}`
-      );
 
       let sortedAchievements = [];
       if (sort === "recent")
@@ -368,10 +329,6 @@ exports.getAllAchievementsBacklog = (req, res) => {
         sortedAchievements = getAchievementsSortedByNameZA(achievements);
 
       const totalAchievementsBeforePagination = sortedAchievements.length;
-      console.log(
-        "TOTAL ACHIEVEMENTS BACKLOG BEFORE PAGINATION -> ",
-        totalAchievementsBeforePagination
-      );
 
       const paginatedAchievements = paginateAchievements(
         sortedAchievements,
@@ -392,9 +349,8 @@ exports.getAllAchievementsNext = (req, res) => {
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
     "utf8",
-    (err, data) => {
+    async (err, data) => {
       if (err) {
-        console.error(err);
         return;
       }
       const dbGames = JSON.parse(data).games;
@@ -418,28 +374,23 @@ exports.getAllAchievementsNext = (req, res) => {
         gamesSortedByCompletion
       );
 
-      console.log(
-        "ACHIEVEMENTS NEXT BEFORE FILTERING LENGTH -> ",
-        achievementsBeforeFiltering.length
-      );
-
       let sortedAchievements = [];
       sortedAchievements = achievementsBeforeFiltering;
 
       const totalAchievementsBeforePagination = sortedAchievements.length;
-      console.log(
-        "TOTAL ACHIEVEMENTS NEXT BEFORE PAGINATION -> ",
-        totalAchievementsBeforePagination
-      );
 
       const paginatedAchievements = paginateAchievementsNext(
         sortedAchievements,
         page
       );
 
+      const descriptionAddedAchievements = getDescForHiddenAchievements(
+        paginatedAchievements
+      );
+
       this.sendResponse(res, {
         total: totalAchievementsBeforePagination,
-        achievements: paginatedAchievements,
+        achievements: descriptionAddedAchievements,
       });
     }
   );
@@ -461,7 +412,6 @@ exports.getAllAchievementsForGame = (req, res) => {
     "utf8",
     (err, data) => {
       if (err) {
-        console.error(err);
         return;
       }
       const dbGames = JSON.parse(data).games;
@@ -472,10 +422,6 @@ exports.getAllAchievementsForGame = (req, res) => {
       );
 
       let achievements = [];
-      console.log(
-        "ACHIEVEMENT FOR GAME BEFORE FILTERING LENGTH -> ",
-        achievementsBeforeFiltering.length
-      );
       achievementsBeforeFiltering.forEach((achievement) => {
         if (
           checkSelectionCriteriaFulfilledForAchievement(achievement, select)
@@ -487,14 +433,6 @@ exports.getAllAchievementsForGame = (req, res) => {
           completed++;
         }
       });
-      console.log(
-        "ACHIEVEMENTS FOR GAME AFTER FILTERING LENGTH -> ",
-        achievements.length
-      );
-
-      console.log(
-        `QUERY ->  SELECT= ${select}, SORT= ${sort}, TYPE= ${type} ORDER= ${order}, PAGE= ${page}`
-      );
 
       let sortedAchievements = [];
       if (sort === "recent")
@@ -513,18 +451,10 @@ exports.getAllAchievementsForGame = (req, res) => {
         sortedAchievements = getAchievementsSortedByNameZA(achievements);
 
       const totalAchievementsBeforePagination = sortedAchievements.length;
-      console.log(
-        "TOTAL ACHIEVEMENTS FOR GAME BEFORE PAGINATION -> ",
-        totalAchievementsBeforePagination.length
-      );
 
       const paginatedAchievements = paginateAchievements(
         sortedAchievements,
         page
-      );
-      console.log(
-        "TOTAL ACHIEVEMENTS FOR GAME AFTER PAGINATION -> ",
-        paginatedAchievements.length
       );
 
       remaining = totalAchievementsBeforePagination - completed;
@@ -540,28 +470,20 @@ exports.getAllAchievementsForGame = (req, res) => {
 };
 
 exports.getHiddenAchievementsForGameByID = async (req, res) => {
-  console.log("GET HIDDEN ACHIEVEMENTS FOR GAME BY ID ROUTE HIT");
   const gameID = req.query.gameid ?? "";
   getHiddenInfoByCrawling(gameID).then((achievements) => {
-    console.log(
-      "HIDDEN ACHIVEMENT LENGTH IN ROUTE HANDLER -> ",
-      achievements.length
-    );
-
     res.json(achievements);
   });
 };
 
 exports.getAllAchievementsForAYear = (req, res) => {
   const year = req.query.year ?? new Date().getFullYear();
-  console.log(year);
 
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
     "utf8",
     (err, data) => {
       if (err) {
-        console.error(err);
         return;
       }
       const database = JSON.parse(data);
@@ -595,7 +517,6 @@ exports.getAllMilestoneAchievements = (req, res) => {
     "utf8",
     (err, data) => {
       if (err) {
-        console.error(err);
         return;
       }
       const database = JSON.parse(data);

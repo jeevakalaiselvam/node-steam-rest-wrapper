@@ -18,7 +18,6 @@ const path = require("path");
 const { nameAZComparatorGame } = require("../helper/comparator");
 
 exports.sendTestResponse = async (req, res, next) => {
-  console.log("SENDING TEST RESPONSE");
   fs.readFile(
     path.join(__dirname, "../", "log", "games.json"),
     "utf8",
@@ -37,14 +36,13 @@ exports.sendTestResponse = async (req, res, next) => {
 
 //Get all games
 exports.allOwnedGames = async () => {
-  console.log("GETTING ALL GAMES FROM STEAM");
   const allGames = await getAllGamesFromSteam();
 
   let newFormatGames = {};
   newFormatGames.total_games = allGames.total_count;
 
   //USE SPLICE HERE WHEN TESTING
-  console.log("ADDING HEADER IMAGES FOR GAMES");
+
   newFormatGames.games = allGames.games.map((game, index) => {
     const newGame = {};
     newGame.name = game.name;
@@ -55,7 +53,6 @@ exports.allOwnedGames = async () => {
     return newGame;
   });
 
-  console.log("GETTING ALL SCHEMA INFORMATION FOR ALL GAMES");
   newFormatGames = await Promise.all(
     newFormatGames.games.map(async (game) => {
       const schemaAchievements = await getAllSchemaAchievements(game.game_id);
@@ -64,7 +61,6 @@ exports.allOwnedGames = async () => {
     })
   );
 
-  console.log("GETTING ALL GLOBAL ACHIEVEMENTS INFORMATION FOR ALL GAMES");
   newFormatGames = await Promise.all(
     newFormatGames.map(async (game) => {
       const globalAchievements = await getAllGlobalAchievements(game.game_id);
@@ -73,7 +69,6 @@ exports.allOwnedGames = async () => {
     })
   );
 
-  console.log("GETTING ALL PLAYER ACHIEVEMENTS INFORMATION FOR ALL GAMES");
   newFormatGames = await Promise.all(
     newFormatGames.map(async (game) => {
       const playerAchievements = await getAllPlayerAchievements(game.game_id);
@@ -81,8 +76,6 @@ exports.allOwnedGames = async () => {
       return game;
     })
   );
-
-  console.log("MERGING ALL GAMES, SCHEMA, PLAYER and GLOBAL INTO SINGLE");
   const transformedGames = mergeFilterAndCalculate(newFormatGames);
 
   const currentdate = new Date();
@@ -106,13 +99,9 @@ exports.allOwnedGames = async () => {
   };
 
   try {
-    console.log("CACHING INFORMATION OBTAINED FROM STEAM INTO FILES");
     const data = fs.writeFileSync(
       path.join(__dirname, "../", "store", "games.json"),
       JSON.stringify(responseToCache)
-    );
-    console.log(
-      "CRAWLER STARTED FOR GETTING ALL HIDDEN ACHIEVEMENT INFORMATION FROM WEB"
     );
     //this.getHiddenAchievementsForGame();
     //file written successfully
@@ -124,7 +113,6 @@ exports.allOwnedGames = async () => {
 //Merge all achievement data present in response from backend API and put them into a single achivements array in each game object
 const mergeFilterAndCalculate = (newFormatGames) => {
   const achievementOnlyGames = filterAchievementOnlyGames(newFormatGames);
-  console.log("ACHIEVEMENT ONLY GAME COUNT -> ", achievementOnlyGames.length);
   const achievementsMergesGames = mergeAchievements(achievementOnlyGames);
 
   return achievementsMergesGames;
@@ -250,9 +238,6 @@ function formatDate(date) {
 }
 
 exports.getHiddenAchievementsForGame = (gameId) => {
-  console.log(
-    "READING ALL GAMES INFO FROM PREVIOUSLY STORED DATA TO FETCH ALL HIDDEN INFORMATION"
-  );
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
     "utf8",
@@ -290,10 +275,6 @@ exports.getHiddenAchievementsForGame = (gameId) => {
                   description: descriptions[i],
                 });
               });
-              console.log(
-                "GATHERED HIDDEN INFORMATION FOR GAME -> ",
-                game.name
-              );
               game.hidden_achievements = hidden_achievements;
             }
           },
@@ -302,16 +283,9 @@ exports.getHiddenAchievementsForGame = (gameId) => {
       });
 
       try {
-        console.log(
-          "WRITING OLD DATA COMBINED WITH HIDDEN ACHIEVEMENTS INFORMATION FOR ALL GAMES"
-        );
         const data = fs.writeFileSync(
           path.join(__dirname, "../", "store", "games.json"),
           JSON.stringify(hiddenAddedGames)
-        );
-
-        console.log(
-          "WAITING FOR NEXT TARGET TIME FOR CACHING UPDATED INFORMATION"
         );
 
         //file written successfully
@@ -324,24 +298,21 @@ exports.getHiddenAchievementsForGame = (gameId) => {
 
 exports.getHiddenInfoByCrawling = async (gameId) => {
   const hiddenAchievements = [];
-  console.log(
-    `GETTING HIDDEN ACHIEVEMENTS FOR GAMEID ${gameId} BY CRAWLING WEBSITES`
-  );
+
   const url = `https://completionist.me/steam/app/${gameId}/achievements?display=mosaic&sort=created&order=desc`;
   const hiddenResponse = await axios.get(url);
-  console.log(`CRAWL STATUS SUCCESS, PARSING HTML TO OBTAIN ALL INFORMATION`);
+
   const html = hiddenResponse.data;
   const $ = cheerio.load(html);
   let titles = [];
   let descriptions = [];
 
-  console.log(`ADDING ALL HIDDEN ACHIEVEMENT TITLES`);
   $("span.title").each(function(i, e) {
     titles[i] = $(this)
       .text()
       .trim();
   });
-  console.log(`ADDING ALL HIDDEN ACHIEVEMENT DESCRIPTIONS`);
+
   $("span.description").each(function(i, e) {
     descriptions[i] = $(this)
       .text()
@@ -355,10 +326,5 @@ exports.getHiddenInfoByCrawling = async (gameId) => {
     });
   });
 
-  console.log("GATHERED HIDDEN INFORMATION FOR GAME BY ID -> ", gameId);
-  console.log(
-    "HIDDEN ACHIEVEMENTS OBTAINED BY CRAWLING LENGTH -> ",
-    hiddenAchievements.length
-  );
   return hiddenAchievements;
 };

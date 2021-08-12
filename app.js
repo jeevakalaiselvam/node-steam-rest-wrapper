@@ -15,6 +15,8 @@ const {
   allOwnedGames,
   getHiddenAchievementDataAndStore,
 } = require("./controllers/cacheController.js");
+const { log } = require("console");
+const { LOG } = require("./helper/logger.js");
 console.clear();
 
 //Load in config
@@ -73,10 +75,10 @@ app.get("*", (req, res) => {
 });
 
 setInterval(() => {
-  console.log("CACHING DATA - CURRENT TIME -> ", new Date().toISOString());
-  console.log("Getting data from Steam and storing..");
+  LOG("CACHING DATA - CURRENT TIME -> ", new Date().toISOString());
+  LOG("Getting data from Steam and storing..");
   allOwnedGames();
 }, 1000 * 60 * 60);
 
 const PORT = process.env.PORT || 8888;
-app.listen(PORT, () => console.log(`Listening on port ${PORT} 👋`));
+app.listen(PORT, () => LOG(`Listening on port ${PORT} 👋`));
