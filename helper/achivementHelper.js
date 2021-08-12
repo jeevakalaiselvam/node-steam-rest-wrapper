@@ -189,6 +189,8 @@ exports.getAllAchievementsRaw = (games) => {
     );
     gameAchievementSortedByEasyAndNotUnlocked.map((achievement) => {
       achievement.game_completion = game.completion_percentage;
+      achievement.game_completed_count = game.completed_achievements_count;
+      achievement.game_total_count = game.total_achievements_count;
       if (achievement.unlocked === 0 && game.completion_percentage) {
         achievements.push(achievement);
       }

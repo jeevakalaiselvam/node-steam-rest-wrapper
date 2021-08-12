@@ -299,7 +299,7 @@ exports.getHiddenAchievementsForGame = (gameId) => {
 
 exports.getHiddenInfoByCrawling = async (gameId) => {
   const hiddenAchievements = [];
-  LOG("GETTING HIDDEN FOR -> ", gameId);
+
   const url = `https://completionist.me/steam/app/${gameId}/achievements?display=mosaic&sort=created&order=desc`;
   const hiddenResponse = await axios.get(url);
   const html = hiddenResponse.data;

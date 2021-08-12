@@ -354,7 +354,6 @@ exports.getAllAchievementsBacklog = (req, res) => {
 };
 
 exports.getAllAchievementsNext = (req, res) => {
-  LOG("NEXT ROUTE HIT");
   const page = req.query.page ?? "1";
   const target = req.query.target ?? "50";
   fs.readFile(
@@ -365,7 +364,6 @@ exports.getAllAchievementsNext = (req, res) => {
         return;
       }
       const dbGames = JSON.parse(data).games;
-      LOG("ALL GAMES -> ", dbGames.length);
 
       const startedGames = dbGames.filter((game) => {
         if (
@@ -377,7 +375,6 @@ exports.getAllAchievementsNext = (req, res) => {
           return false;
         }
       });
-      LOG("STARTED GAMES -> ", startedGames.length);
 
       const gamesSortedByCompletion = getGamesSortedByCompletionPercentage(
         startedGames
