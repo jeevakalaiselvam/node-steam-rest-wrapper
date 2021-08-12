@@ -388,7 +388,7 @@ exports.getAllAchievementsBacklog = (req, res) => {
 
 exports.getAllAchievementsNext = (req, res) => {
   const page = req.query.page ?? "1";
-
+  const target = req.query.target ?? "50";
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
     "utf8",
@@ -400,14 +400,23 @@ exports.getAllAchievementsNext = (req, res) => {
       const dbGames = JSON.parse(data).games;
 
       const startedGames = dbGames.filter((game) => {
-        if (game.completed_achievements_count > 0) {
+        if (
+          game.completed_achievements_count > 0 &&
+          game.completion_percentage < target
+        ) {
           return true;
         } else {
           return false;
         }
       });
 
-      const achievementsBeforeFiltering = getAllAchievementsRaw(startedGames);
+      const gamesSortedByCompletion = getGamesSortedByCompletionPercentage(
+        startedGames
+      );
+
+      const achievementsBeforeFiltering = getAllAchievementsRaw(
+        gamesSortedByCompletion
+      );
 
       console.log(
         "ACHIEVEMENTS NEXT BEFORE FILTERING LENGTH -> ",
@@ -415,9 +424,7 @@ exports.getAllAchievementsNext = (req, res) => {
       );
 
       let sortedAchievements = [];
-      sortedAchievements = getAchievementsSortedByRarityEasy(
-        achievementsBeforeFiltering
-      );
+      sortedAchievements = achievementsBeforeFiltering;
 
       const totalAchievementsBeforePagination = sortedAchievements.length;
       console.log(

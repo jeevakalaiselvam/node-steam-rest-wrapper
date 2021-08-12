@@ -146,7 +146,10 @@ exports.getAllAchievementsRaw = (games) => {
   let achievements = [];
   games.map((game) => {
     const gameAchievements = game.all_achievements;
-    gameAchievements.map((achievement) => {
+    const gameAchievementSortedByEasyAndNotUnlocked = this.getAchievementsSortedByRarityEasy(
+      gameAchievements
+    );
+    gameAchievementSortedByEasyAndNotUnlocked.map((achievement) => {
       achievement.game_completion = game.completion_percentage;
       if (achievement.unlocked === 0) {
         achievements.push(achievement);
