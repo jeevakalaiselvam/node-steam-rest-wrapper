@@ -38,6 +38,8 @@ const {
   getHiddenInfoByCrawling,
   refreshDatabaseAndStore,
 } = require("./cacheController");
+const axios = require("axios");
+const { getImageURLAfterDownloadAndUpscale } = require("../helper/imageHelper");
 
 const ADD_TEST_DELAY = true;
 
@@ -403,6 +405,14 @@ exports.getAllAchievementsNext = (req, res) => {
       const descriptionAddedAchievement = await getDescForHiddenAchievements(
         paginatedAchievements[0]
       );
+      // const { name, icon, game_id, id } = descriptionAddedAchievement;
+      // LOG(`${name}-${icon}-${game_id}`);
+      // const newImageURL = await getImageURLAfterDownloadAndUpscale(
+      //   icon,
+      //   game_id,
+      //   id
+      // );
+      // console.log(`${game_id}_${id}.jpg`);
 
       this.sendResponse(res, {
         total: totalAchievementsBeforePagination,

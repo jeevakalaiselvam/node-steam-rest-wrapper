@@ -28,6 +28,7 @@
     "dotenv": "^10.0.0",
     "express-mongo-sanitize": "^2.1.0",
     "express-rate-limit": "^5.3.0",
+    "fs-extra": "^10.0.0",
     "helmet": "^4.6.0",
     "htmlparser2": "^6.1.0",
     "morgan": "^1.10.0",
@@ -35,6 +36,7 @@
     "nodemon": "^2.0.12",
     "pug": "^3.0.2",
     "puppeteer": "^10.1.0",
+    "upscaler": "^0.8.27",
     "xss": "^1.0.9",
     "xss-clean": "^0.1.1"
   },
