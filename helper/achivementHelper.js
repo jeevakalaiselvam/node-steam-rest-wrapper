@@ -202,9 +202,16 @@ exports.getAllAchievementsRaw = (games) => {
 exports.getAllAchievementsRawForAGame = (games, gameTmp) => {
   let achievements = [];
 
+  console.log("Achivement for Game");
   games.map((game) => {
     if (+game.id === +gameTmp) {
       achievements = game.all_achievements;
+      achievements = achievements.map((achievement) => {
+        achievement.game_completion = game.completion_percentage;
+        achievement.game_completed_count = game.completed_achievements_count;
+        achievement.game_total_count = game.total_achievements_count;
+        return achievement;
+      });
     }
   });
   return achievements;
