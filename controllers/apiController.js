@@ -576,3 +576,79 @@ exports.getAllMilestoneAchievements = (req, res) => {
     }
   );
 };
+
+//Random Game Route Handler
+exports.getRandomGame = (req, res) => {
+  const target = req.query.target ?? 100;
+
+  fs.readFile(
+    path.join(__dirname, "../", "store", "games.json"),
+    "utf8",
+    (err, data) => {
+      if (err) {
+        return;
+      }
+      const dbGames = JSON.parse(data).games;
+
+      const notStartedGames = [];
+      dbGames.forEach((game) => {
+        if (game.completed_achievements_count === 0) {
+          notStartedGames.push(game);
+        }
+      });
+
+      let gameAlreadyPresent = null;
+      fs.readFile(
+        path.join(__dirname, "../", "store", "random.json"),
+        (err, data) => {
+          if (!err) {
+            if (data) {
+              gameAlreadyPresent = JSON.parse(data);
+            }
+
+            if (gameAlreadyPresent) {
+              dbGames.forEach((game) => {
+                if (game.id === gameAlreadyPresent.id) {
+                  if (game.completion_percentage >= target) {
+                    gameAlreadyPresent =
+                      notStartedGames[
+                        Math.floor(Math.random() * notStartedGames.length + 1)
+                      ];
+
+                    fs.writeFile(
+                      path.join(__dirname, "../", "store", "random.json"),
+                      JSON.stringify(gameAlreadyPresent),
+                      (err) => {
+                        if (err) {
+                          console.log("ERROR WRITING RANDOM GAME");
+                        }
+                      }
+                    );
+                  }
+                }
+              });
+            } else {
+              gameAlreadyPresent =
+                notStartedGames[
+                  Math.floor(Math.random() * notStartedGames.length + 1)
+                ];
+
+              fs.writeFile(
+                path.join(__dirname, "../", "store", "random.json"),
+                JSON.stringify(gameAlreadyPresent),
+                (err) => {
+                  if (err) {
+                    console.log("ERROR WRITING RANDOM GAME");
+                  }
+                }
+              );
+            }
+            this.sendResponse(res, {
+              game: gameAlreadyPresent,
+            });
+          }
+        }
+      );
+    }
+  );
+};

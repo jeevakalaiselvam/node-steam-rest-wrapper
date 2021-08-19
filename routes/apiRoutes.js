@@ -14,6 +14,7 @@ router.get("/database", apiController.getDatabase);
 router.get("/games/info", apiController.getAllGamesInfo);
 router.get("/game/info", apiController.getGameInfo);
 router.get("/games", apiController.getAllGames);
+router.get("/random", apiController.getRandomGame);
 router.get("/achievements/history", apiController.getAllAchievementsForAYear);
 router.get("/achievements/game", apiController.getAllAchievementsForGame);
 router.get(
