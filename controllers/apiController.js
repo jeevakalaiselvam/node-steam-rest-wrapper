@@ -184,6 +184,7 @@ exports.getAllGames = (req, res) => {
   const sort = req.query.sort ?? "";
   const order = req.query.order ?? "";
   const page = req.query.page ?? "0";
+  const target = req.query.target ?? "100";
 
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
@@ -196,7 +197,7 @@ exports.getAllGames = (req, res) => {
 
       let games = [];
       dbGames.forEach((dbGame) => {
-        if (checkSelectionCriteriaFulfilled(dbGame, select)) {
+        if (checkSelectionCriteriaFulfilled(dbGame, select, target)) {
           let game = {};
           game.name = dbGame.name;
           game.id = dbGame.id;

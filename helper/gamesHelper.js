@@ -73,11 +73,11 @@ exports.getGamesSortedByNameZA = (games) => {
   return newGames;
 };
 
-exports.checkSelectionCriteriaFulfilled = (game, select) => {
+exports.checkSelectionCriteriaFulfilled = (game, select, target) => {
   if (select === "all") {
     return true;
   } else if (select === "completed") {
-    if (game.completion_percentage >= 80) {
+    if (game.completion_percentage >= +target) {
       return true;
     }
   } else if (select === "started") {
