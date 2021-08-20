@@ -186,6 +186,8 @@ exports.getAllGames = (req, res) => {
   const page = req.query.page ?? "0";
   const target = req.query.target ?? "100";
 
+  await refreshDatabaseAndStore();
+
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
     "utf8",
