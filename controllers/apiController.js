@@ -179,7 +179,7 @@ exports.getImagesForOverlay = (req, res) => {
   );
 };
 
-exports.getAllGames = (req, res) => {
+exports.getAllGames = async (req, res) => {
   const select = req.query.select ?? "";
   const sort = req.query.sort ?? "";
   const order = req.query.order ?? "";
