@@ -110,9 +110,9 @@ exports.refreshDatabaseAndStore = async (next, gameSync = true) => {
       JSON.stringify(responseToCache),
       (error) => {
         LOG("WRITING AND SYNCING INTO DATABASE SUCCESSS");
-        if (gameSync) {
-          next();
-        }
+        // if (gameSync) {
+        //   next();
+        // }
       }
     );
     //this.getHiddenAchievementsForGame();
