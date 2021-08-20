@@ -15,7 +15,7 @@ router.get("/games/info", apiController.getAllGamesInfo);
 router.get("/game/info", apiController.getGameInfo);
 router.get(
   "/games",
-  apiController.refreshDatabaseBeforeAllGames,
+  // apiController.refreshDatabaseBeforeAllGames,
   apiController.getAllGames
 );
 router.get("/random", apiController.getRandomGame);
