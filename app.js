@@ -79,7 +79,7 @@ setInterval(() => {
   LOG("CACHING DATA - CURRENT TIME -> ", new Date().toISOString());
   LOG("Getting data from Steam and storing..");
   refreshDatabaseAndStore();
-}, 1000 * 60 * 1);
+}, 1000 * 60 * 60);
 
 const PORT = process.env.PORT || 8888;
 app.listen(PORT, () => LOG(`Listening on port ${PORT} 👋`));
