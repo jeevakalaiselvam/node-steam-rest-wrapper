@@ -111,6 +111,10 @@ exports.refreshDatabase = (req, res) => {
   });
 };
 
+exports.refreshDatabaseBeforeAllGames = async (req, res, next) => {
+  await refreshDatabaseAndStore(next, true);
+};
+
 exports.getGameInfo = (req, res) => {
   const gameid = req.query.gameid;
   fs.readFile(
@@ -186,8 +190,7 @@ exports.getAllGames = async (req, res) => {
   const page = req.query.page ?? "0";
   const target = req.query.target ?? "100";
 
-  await refreshDatabaseAndStore();
-
+  console.log("READING DATA AFTER SYNCING");
   fs.readFile(
     path.join(__dirname, "../", "store", "games.json"),
     "utf8",

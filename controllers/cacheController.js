@@ -17,6 +17,7 @@ const fs = require("fs");
 const path = require("path");
 const { nameAZComparatorGame } = require("../helper/comparator");
 const { LOG } = require("../helper/logger");
+const { getAllGames } = require("./apiController");
 
 exports.sendTestResponse = async (req, res, next) => {
   fs.readFile(
@@ -36,7 +37,7 @@ exports.sendTestResponse = async (req, res, next) => {
 };
 
 //Get all games
-exports.refreshDatabaseAndStore = async () => {
+exports.refreshDatabaseAndStore = async (next, gameSync = true) => {
   try {
     LOG("REFRESHING DATABASE");
     const allGames = await getAllGamesFromSteam();
@@ -104,11 +105,14 @@ exports.refreshDatabaseAndStore = async () => {
     };
 
     LOG("WRITING GATHERED INFO INTO DATABASE");
-    const data = fs.writeFile(
+    await fs.writeFile(
       path.join(__dirname, "../", "store", "games.json"),
       JSON.stringify(responseToCache),
       (error) => {
         LOG("WRITING AND SYNCING INTO DATABASE SUCCESSS");
+        if (gameSync) {
+          next();
+        }
       }
     );
     //this.getHiddenAchievementsForGame();

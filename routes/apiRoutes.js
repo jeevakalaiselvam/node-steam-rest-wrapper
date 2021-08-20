@@ -13,7 +13,11 @@ router.get("/overlay", apiController.getImagesForOverlay);
 router.get("/database", apiController.getDatabase);
 router.get("/games/info", apiController.getAllGamesInfo);
 router.get("/game/info", apiController.getGameInfo);
-router.get("/games", apiController.getAllGames);
+router.get(
+  "/games",
+  apiController.refreshDatabaseBeforeAllGames,
+  apiController.getAllGames
+);
 router.get("/random", apiController.getRandomGame);
 router.get("/achievements/history", apiController.getAllAchievementsForAYear);
 router.get("/achievements/game", apiController.getAllAchievementsForGame);
