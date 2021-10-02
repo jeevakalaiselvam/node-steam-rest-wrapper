@@ -2,10 +2,10 @@
   "name": "steam-crawler",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -34,9 +34,7 @@
     "htmlparser2": "^6.1.0",
     "morgan": "^1.10.0",
     "node-html-parser": "^4.1.2",
-    "nodemon": "^2.0.12",
     "pug": "^3.0.2",
-    "puppeteer": "^10.1.0",
     "upscaler": "^0.8.27",
     "xss": "^1.0.9",
     "xss-clean": "^0.1.1"
@@ -46,10 +44,12 @@
   },
   "devDependencies": {
     "eslint": "^5.16.0",
+    "puppeteer": "^10.1.0",
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-import": "^2.17.2",
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-node": "^8.0.1",
+    "nodemon": "^2.0.12",
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
     "parcel-bundler": "^1.12.3",
