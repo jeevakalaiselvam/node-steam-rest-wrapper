@@ -44,7 +44,6 @@
   },
   "devDependencies": {
     "eslint": "^5.16.0",
-    "puppeteer": "^10.1.0",
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-import": "^2.17.2",
     "eslint-plugin-jsx-a11y": "^6.2.1",
