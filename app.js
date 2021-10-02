@@ -77,7 +77,7 @@ app.get("*", (req, res) => {
 
 setInterval(() => {
   LOG("CACHING DATA - CURRENT TIME -> ", new Date().toISOString());
-  LOG("Getting data from Steam and storing..");
+  LOG("Getting data from Steam and storing...");
   refreshDatabaseAndStore();
 }, 1000 * 60 * 60);
 
