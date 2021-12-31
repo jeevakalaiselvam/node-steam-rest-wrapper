@@ -1,7 +1,6 @@
 const axios = require("axios");
 const htmlparser2 = require("htmlparser2");
 const cheerio = require("cheerio");
-const puppeteer = require("puppeteer");
 const fs = require("fs");
 var DomParser = require("dom-parser");
 var parser = new DomParser();

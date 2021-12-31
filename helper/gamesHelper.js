@@ -100,6 +100,7 @@ exports.checkSelectionCriteriaFulfilledForAchievement = (
   if (select === "all") {
     return true;
   } else if (select === "unlocked") {
+    console.log(achievement);
     if (achievement.unlocked === 1) {
       return true;
     } else {
