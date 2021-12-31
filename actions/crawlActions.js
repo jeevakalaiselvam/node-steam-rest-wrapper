@@ -22,6 +22,7 @@ exports.getAllGamesFromSteam = async () => {
     allGames.games = allGamesOld.response.games;
     return allGames;
   } catch (error) {
+    console.log(error)
     return {
       status: "fail",
       point: "[ACTIONS]",

@@ -118,7 +118,7 @@ exports.refreshDatabaseAndStore = async (next, gameSync = true) => {
     //this.getHiddenAchievementsForGame();
     //file written successfully
   } catch (err) {
-    console.error(err);
+    console.log(err);
   }
 };
 
