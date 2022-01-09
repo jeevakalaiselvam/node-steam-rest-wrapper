@@ -101,7 +101,7 @@ exports.checkSelectionCriteriaFulfilledForAchievement = (
     return true;
   } else if (select === "unlocked") {
     console.log(achievement);
-    if (achievement.unlocked === 1) {
+    if (achievement.unlocked == 1) {
       return true;
     } else {
       return false;
