@@ -204,7 +204,7 @@ exports.getAllGames = async (req, res) => {
       const dbGames = JSON.parse(data).games;
 
       let games = [];
-      dbGames.forEach((dbGame) => {
+      dbGames.forEach((dbGame, index) => {
         if (checkSelectionCriteriaFulfilled(dbGame, select, target)) {
           let game = {};
           game.name = dbGame.name;
@@ -214,8 +214,10 @@ exports.getAllGames = async (req, res) => {
           game.total_achievements_count = dbGame.total_achievements_count;
           game.completed_achievements_count =
             dbGame.completed_achievements_count;
-          game.completion_percentage = dbGame.completion_percentage;
+          game.all_achievements = dbGame.all_achievements;
           games.push(game);
+
+          console.log(Object.keys(game));
         } else {
         }
       });
