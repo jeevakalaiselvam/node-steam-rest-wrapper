@@ -86,6 +86,7 @@ exports.getAllGamesInfo = (req, res) => {
 
       let gameInfo = {};
       let allPercentages = [];
+      let allAchievements = [];
       let totalGames = 0;
       let completedAchievements = 0;
 
@@ -93,11 +94,13 @@ exports.getAllGamesInfo = (req, res) => {
         allPercentages.push(game.completion_percentage);
         totalGames += 1;
         completedAchievements += game.completed_achievements_count;
+        allAchievements = [...allAchievements, ...game.all_achievements];
       });
 
       gameInfo.total_games = totalGames;
       gameInfo.completed_achievements = completedAchievements;
       gameInfo.game_percentages = allPercentages;
+      gameInfo.all_achievements = allAchievements;
 
       this.sendResponse(res, gameInfo);
     }
