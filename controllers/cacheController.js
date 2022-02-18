@@ -76,6 +76,7 @@ exports.refreshDatabaseAndStore = async (next, gameSync = true) => {
     newFormatGames = await Promise.all(
       newFormatGames.map(async (game) => {
         const playerAchievements = await getAllPlayerAchievements(game.game_id);
+        console.log(playerAchievements[0]);
         game.player_achievements = playerAchievements;
         return game;
       })
